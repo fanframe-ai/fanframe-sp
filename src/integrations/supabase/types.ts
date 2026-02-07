@@ -14,36 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      consent_logs: {
-        Row: {
-          accepted_at: string
-          consent_text: string
-          consent_type: string
-          id: string
-          ip_address: string | null
-          user_agent: string | null
-          user_id: string
-        }
-        Insert: {
-          accepted_at?: string
-          consent_text: string
-          consent_type?: string
-          id?: string
-          ip_address?: string | null
-          user_agent?: string | null
-          user_id: string
-        }
-        Update: {
-          accepted_at?: string
-          consent_text?: string
-          consent_type?: string
-          id?: string
-          ip_address?: string | null
-          user_agent?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
       daily_stats: {
         Row: {
           avg_processing_time_ms: number | null

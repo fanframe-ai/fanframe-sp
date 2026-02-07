@@ -1,13 +1,1 @@
-project_id = "ysoartfnunjcgwfudaje"
-
-[functions.create-checkout]
-verify_jwt = false
-
-[functions.generate-tryon]
-verify_jwt = false
-
-[functions.replicate-webhook]
-verify_jwt = false
-
-[functions.deploy-functions]
-verify_jwt = false
+project_id = "nosobqpiqhskkcfefbuw"
