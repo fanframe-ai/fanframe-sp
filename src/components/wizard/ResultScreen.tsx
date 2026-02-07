@@ -1,0 +1,580 @@
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Download, RefreshCw, Share2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import type { Shirt, Background } from "./ShirtSelectionScreen";
+import { useToast } from "@/hooks/use-toast";
+import { useFanFrameCredits } from "@/hooks/useFanFrameCredits";
+import { FANFRAME_ERROR_CODES, getAssetFullUrl } from "@/config/fanframe";
+import { useQueueSubscription, useQueueStatusCheck } from "@/hooks/useQueueSubscription";
+
+interface ResultScreenProps {
+  userImage: string;
+  selectedShirt: Shirt;
+  selectedBackground: Background;
+  balance: number;
+  onTryAgain: () => void;
+  onBalanceUpdate: (newBalance: number) => void;
+  onNoCredits: () => void;
+}
+
+// Progress messages based on queue position
+const getProgressMessage = (progress: number, queuePosition: number) => {
+  if (queuePosition > 20) {
+    return { 
+      title: "Alta demanda! 🔥", 
+      subtitle: `Posição ${queuePosition} na fila` 
+    };
+  }
+  if (queuePosition > 5) {
+    return { 
+      title: "Preparando seu manto...", 
+      subtitle: `Posição ${queuePosition} na fila` 
+    };
+  }
+  
+  // Regular progress messages
+  if (progress < 15) return { title: "Preparando o tecido...", subtitle: "Separando os melhores materiais" };
+  if (progress < 30) return { title: "Cortando o manto...", subtitle: "Cada detalhe conta" };
+  if (progress < 50) return { title: "Costurando o manto...", subtitle: "Com amor de torcedor" };
+  if (progress < 70) return { title: "Bordando o escudo...", subtitle: "O símbolo do Tricolor" };
+  if (progress < 85) return { title: "Ajustando o caimento...", subtitle: "Perfeito pra você" };
+  if (progress < 95) return { title: "Finalizando detalhes...", subtitle: "Quase pronto!" };
+  return { title: "Manto pronto!", subtitle: "Vai São Paulo!" };
+};
+
+export const ResultScreen = ({
+  userImage,
+  selectedShirt,
+  selectedBackground,
+  balance,
+  onTryAgain,
+  onBalanceUpdate,
+  onNoCredits,
+}: ResultScreenProps) => {
+  const [isGenerating, setIsGenerating] = useState(true);
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [progress, setProgress] = useState(0);
+  const [queueId, setQueueId] = useState<string | null>(null);
+  const [queuePosition, setQueuePosition] = useState(1);
+  
+  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const hasStartedRef = useRef(false);
+  const { toast } = useToast();
+
+  const { 
+    debitCredit, 
+    generateGenerationId, 
+    clearGenerationId 
+  } = useFanFrameCredits();
+
+  // Check queue status on mount (in case we missed realtime update)
+  const { status: queueStatus, resultImageUrl, errorMessage } = useQueueStatusCheck(queueId);
+
+  // Handle queue completion from status check
+  useEffect(() => {
+    if (queueStatus === "completed" && resultImageUrl && !generatedImage) {
+      handleGenerationComplete(resultImageUrl);
+    } else if (queueStatus === "failed" && errorMessage && !error) {
+      handleGenerationFailed(errorMessage);
+    }
+  }, [queueStatus, resultImageUrl, errorMessage]);
+
+  // Subscribe to queue updates via Realtime
+  const handleRealtimeCompleted = useCallback(async (imageUrl: string) => {
+    await handleGenerationComplete(imageUrl);
+  }, []);
+
+  const handleRealtimeFailed = useCallback((errorMsg: string) => {
+    handleGenerationFailed(errorMsg);
+  }, []);
+
+  const handlePositionUpdate = useCallback((position: number) => {
+    setQueuePosition(position);
+  }, []);
+
+  useQueueSubscription({
+    queueId: queueId || "",
+    onCompleted: handleRealtimeCompleted,
+    onFailed: handleRealtimeFailed,
+    onPositionUpdate: handlePositionUpdate,
+  });
+
+  const handleGenerationComplete = async (imageUrl: string) => {
+    console.log("[ResultScreen] Generation completed via queue!");
+    
+    // Debit credit after successful generation
+    const localGenerationId = generateGenerationId();
+    const debitResult = await debitCredit(localGenerationId);
+
+    if (!debitResult.success) {
+      console.warn("[ResultScreen] Débito falhou após geração:", debitResult.errorCode);
+      
+      if (debitResult.errorCode === FANFRAME_ERROR_CODES.noCredits) {
+        onBalanceUpdate(0);
+      }
+    } else {
+      console.log("[ResultScreen] Débito autorizado! Saldo após:", debitResult.balanceAfter);
+      if (debitResult.balanceAfter !== undefined) {
+        onBalanceUpdate(debitResult.balanceAfter);
+      }
+    }
+
+    clearGenerationId();
+    completeProgress();
+    
+    // Small delay to show 100% before displaying image
+    await new Promise(resolve => setTimeout(resolve, 300));
+    setGeneratedImage(imageUrl);
+    setIsGenerating(false);
+  };
+
+  const handleGenerationFailed = (errorMsg: string) => {
+    console.error("[ResultScreen] Generation failed:", errorMsg);
+    clearGenerationId();
+    completeProgress();
+    setError(errorMsg);
+    setIsGenerating(false);
+    
+    toast({
+      title: "Erro na geração",
+      description: "Seu crédito não foi consumido. Tente novamente.",
+      variant: "destructive",
+    });
+  };
+
+  const startProgressAnimation = useCallback((estimatedSeconds: number) => {
+    setProgress(0);
+    
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+    }
+    
+    let currentProgress = 0;
+    const totalUpdates = (estimatedSeconds * 1000) / 200; // updates every 200ms
+    const incrementPerUpdate = 95 / totalUpdates;
+    
+    progressIntervalRef.current = setInterval(() => {
+      // Slow down as we approach 95%
+      const slowdownFactor = Math.max(0.3, 1 - (currentProgress / 120));
+      currentProgress = Math.min(95, currentProgress + incrementPerUpdate * slowdownFactor);
+      setProgress(Math.round(currentProgress));
+      
+      if (currentProgress >= 95) {
+        if (progressIntervalRef.current) {
+          clearInterval(progressIntervalRef.current);
+        }
+      }
+    }, 200);
+  }, []);
+
+  const completeProgress = useCallback(() => {
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+    }
+    setProgress(100);
+  }, []);
+
+  const startGeneration = useCallback(async () => {
+    // Check balance first
+    if (balance <= 0) {
+      console.log("[ResultScreen] No credits - redirecting to purchase");
+      onNoCredits();
+      return;
+    }
+
+    setIsGenerating(true);
+    setError(null);
+    setQueueId(null);
+
+    try {
+      // Build full URLs for assets
+      const shirtAssetUrl = getAssetFullUrl(selectedShirt.assetPath);
+      const backgroundAssetUrl = getAssetFullUrl(selectedBackground.assetPath);
+
+      console.log("[ResultScreen] Starting async generation:", {
+        shirtAssetUrl,
+        backgroundAssetUrl,
+        userImageLength: userImage.length,
+      });
+
+      // Call generate-tryon (now returns immediately with queue info)
+      const { data, error: fnError } = await supabase.functions.invoke("generate-tryon", {
+        body: {
+          userImageBase64: userImage,
+          shirtAssetUrl,
+          backgroundAssetUrl,
+          shirtId: selectedShirt.id,
+        },
+      });
+
+      if (fnError) {
+        throw fnError;
+      }
+
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      if (!data?.queueId) {
+        throw new Error("Falha ao iniciar geração");
+      }
+
+      // Set queue ID to start listening for updates
+      console.log("[ResultScreen] Queue entry created:", {
+        queueId: data.queueId,
+        position: data.queuePosition,
+        estimatedWait: data.estimatedWaitSeconds,
+      });
+
+      setQueueId(data.queueId);
+      setQueuePosition(data.queuePosition || 1);
+      
+      // Start progress animation based on estimated wait
+      const estimatedSeconds = data.estimatedWaitSeconds || 45;
+      startProgressAnimation(estimatedSeconds);
+
+    } catch (err) {
+      console.error("[ResultScreen] Error starting generation:", err);
+      setError(err instanceof Error ? err.message : "Erro ao iniciar geração");
+      setIsGenerating(false);
+      
+      toast({
+        title: "Erro na geração",
+        description: "Seu crédito não foi consumido. Tente novamente.",
+        variant: "destructive",
+      });
+    }
+  }, [
+    balance,
+    userImage, 
+    selectedShirt,
+    selectedBackground,
+    startProgressAnimation,
+    onNoCredits,
+    toast
+  ]);
+
+  // Start generation on mount
+  useEffect(() => {
+    if (!hasStartedRef.current) {
+      hasStartedRef.current = true;
+      startGeneration();
+    }
+
+    return () => {
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+      }
+    };
+  }, [startGeneration]);
+
+  const applyWatermark = async (imageBase64: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const mainImage = new Image();
+      const watermark = new Image();
+      
+      mainImage.crossOrigin = "anonymous";
+      
+      const timeout = setTimeout(() => {
+        console.error("Watermark timeout - images took too long to load");
+        reject(new Error("Timeout loading images"));
+      }, 10000);
+      
+      const loadImage = (img: HTMLImageElement, src: string): Promise<void> => {
+        return new Promise((res, rej) => {
+          img.onload = () => {
+            console.log("Image loaded:", src.substring(0, 50));
+            res();
+          };
+          img.onerror = (e) => {
+            console.error("Failed to load image:", src.substring(0, 50), e);
+            rej(new Error(`Failed to load: ${src.substring(0, 50)}`));
+          };
+          img.src = src;
+        });
+      };
+      
+      Promise.all([
+        loadImage(mainImage, imageBase64),
+        loadImage(watermark, "/watermark.webp")
+      ])
+        .then(() => {
+          clearTimeout(timeout);
+          
+          const canvas = document.createElement("canvas");
+          canvas.width = mainImage.width;
+          canvas.height = mainImage.height;
+          const ctx = canvas.getContext("2d");
+          
+          if (!ctx) {
+            reject(new Error("Could not get canvas context"));
+            return;
+          }
+          
+          ctx.drawImage(mainImage, 0, 0);
+          
+          const watermarkWidth = Math.max(150, mainImage.width * 0.15);
+          const watermarkHeight = (watermark.height / watermark.width) * watermarkWidth;
+          
+          const x = mainImage.width - watermarkWidth - 15;
+          const y = mainImage.height - watermarkHeight - 15;
+          
+          ctx.globalAlpha = 0.85;
+          ctx.drawImage(watermark, x, y, watermarkWidth, watermarkHeight);
+          ctx.globalAlpha = 1.0;
+          
+          resolve(canvas.toDataURL("image/png"));
+        })
+        .catch((error) => {
+          clearTimeout(timeout);
+          console.error("Error in applyWatermark:", error);
+          reject(error);
+        });
+    });
+  };
+
+  const handleDownload = async () => {
+    if (!generatedImage) return;
+
+    try {
+      console.log("Starting download with watermark...");
+      
+      const isUrl = generatedImage.startsWith("http");
+      let imageToProcess = generatedImage;
+      
+      if (isUrl) {
+        console.log("Converting URL to base64 for watermark...");
+        try {
+          const response = await fetch(generatedImage);
+          const blob = await response.blob();
+          imageToProcess = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          });
+        } catch (fetchError) {
+          console.warn("Could not fetch image, trying direct approach:", fetchError);
+        }
+      }
+      
+      const imageWithWatermark = await applyWatermark(imageToProcess);
+      
+      const link = document.createElement("a");
+      link.href = imageWithWatermark;
+      link.download = `provador-tricolor-${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast({
+        title: "Download iniciado!",
+        description: "Sua foto com marca d'água está sendo baixada",
+      });
+    } catch (error) {
+      console.error("Error applying watermark:", error);
+      
+      toast({
+        title: "Erro ao aplicar marca d'água",
+        description: "Baixando imagem sem marca d'água...",
+        variant: "destructive",
+      });
+      
+      const link = document.createElement("a");
+      link.href = generatedImage;
+      link.download = `provador-tricolor-${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  const handleShare = async (platform: "whatsapp" | "twitter" | "copy") => {
+    const shareText = "Olha eu vestindo o manto Tricolor! ❤️🤍🖤 #VaiSaoPaulo #Tricolor #ProvadorTricolor";
+    
+    if (platform === "whatsapp") {
+      window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank");
+    } else if (platform === "twitter") {
+      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`, "_blank");
+    } else if (platform === "copy") {
+      await navigator.clipboard.writeText(shareText);
+      toast({
+        title: "Copiado!",
+        description: "Texto copiado para a área de transferência",
+      });
+    }
+  };
+
+  const handleRetry = () => {
+    setError(null);
+    hasStartedRef.current = false;
+    startGeneration();
+  };
+
+  // Loading state
+  if (isGenerating) {
+    const { title, subtitle } = getProgressMessage(progress, queuePosition);
+    
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 safe-bottom">
+        <div className="text-center animate-fade-in w-full max-w-md">
+          {/* Spinner */}
+          <div className="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-6 sm:mb-8">
+            <div className="absolute inset-0 rounded-full border-4 border-white/20" />
+            <div className="absolute inset-0 rounded-full border-4 border-white border-t-transparent animate-spin" />
+          </div>
+          
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-black mb-1 sm:mb-2 uppercase transition-all duration-300">
+            {title}
+          </h2>
+          <p className="text-muted-foreground text-sm sm:text-base max-w-xs mx-auto mb-6 sm:mb-8 transition-all duration-300">
+            {subtitle}
+          </p>
+          
+          {/* Progress Bar */}
+          <div className="px-2 sm:px-4 mb-6 sm:mb-8">
+            <Progress value={progress} className="h-2 sm:h-3 mb-2" />
+            <p className="text-base sm:text-lg font-bold text-white">{progress}%</p>
+          </div>
+
+          {/* Queue position indicator (only show if > 5) */}
+          {queuePosition > 5 && (
+            <div className="mb-4 animate-fade-in">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-sm">
+                <span className="text-muted-foreground">Posição na fila:</span>
+                <span className="font-bold text-white">{queuePosition}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Warning */}
+          <div className="glass-card p-3 sm:p-4 rounded-xl border-2 border-warning/50 bg-warning/20">
+            <p className="text-xs sm:text-sm text-warning font-semibold">
+              ⚠️ Não atualize ou feche a página
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 safe-bottom">
+        <div className="text-center animate-fade-in">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-6 sm:mb-8 rounded-2xl bg-destructive/20 flex items-center justify-center">
+            <span className="text-3xl sm:text-4xl">😢</span>
+          </div>
+          <h2 className="text-xl sm:text-2xl font-black mb-3 sm:mb-4 uppercase">
+            Ops, deu ruim!
+          </h2>
+          <p className="text-muted-foreground text-sm sm:text-base mb-6 sm:mb-8 max-w-xs mx-auto">
+            {error}
+          </p>
+          <Button
+            onClick={handleRetry}
+            size="lg"
+            className="btn-mobile-cta bg-white text-black hover:bg-white/90"
+          >
+            <RefreshCw className="w-5 h-5 mr-2" />
+            Tentar Novamente
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Success state
+  return (
+    <div className="min-h-screen flex flex-col items-center px-4 py-8 safe-bottom">
+      {/* Header */}
+      <div className="text-center mb-4 sm:mb-6 animate-fade-in">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-black mb-1 sm:mb-2 uppercase tracking-tight">
+          Ficou épico!
+        </h2>
+        <p className="text-muted-foreground text-sm sm:text-base">
+          Você vestiu o manto do São Paulo.
+        </p>
+      </div>
+
+      {/* Credits Counter */}
+      <div className="mb-4 sm:mb-6 animate-fade-in" style={{ animationDelay: "0.1s" }}>
+        <div className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/10 text-xs sm:text-sm">
+          <span className="text-muted-foreground">Créditos: </span>
+          <span className="font-bold text-white">{balance}</span>
+        </div>
+      </div>
+
+      {/* Generated Image */}
+      <div className="w-full max-w-md mb-6 sm:mb-8 animate-scale-in" style={{ animationDelay: "0.2s" }}>
+        <div className="glass-card p-3 sm:p-4 rounded-2xl">
+          <div className="aspect-[3/4] rounded-xl overflow-hidden bg-secondary">
+            {generatedImage && (
+              <img
+                src={generatedImage}
+                alt="Você com o manto do São Paulo"
+                className="w-full h-full object-cover"
+              />
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="w-full max-w-md space-y-3 mb-6 sm:mb-8 animate-fade-in" style={{ animationDelay: "0.3s" }}>
+        <Button
+          onClick={handleDownload}
+          size="lg"
+          className="w-full btn-mobile-cta bg-white text-black hover:bg-white/90 transition-all"
+        >
+          <Download className="w-5 h-5 mr-2" />
+          Baixar Foto
+        </Button>
+
+        <Button
+          onClick={balance > 0 ? onTryAgain : onNoCredits}
+          size="lg"
+          variant="outline"
+          className="w-full btn-mobile border-white/30 hover:bg-white/10 transition-all"
+        >
+          <RefreshCw className="w-5 h-5 mr-2" />
+          {balance > 0 ? "TROCAR CAMISETA" : "GERAR OUTRA FOTO"}
+        </Button>
+      </div>
+
+      {/* Share Buttons */}
+      <div className="w-full max-w-md animate-fade-in" style={{ animationDelay: "0.4s" }}>
+        <p className="text-center text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
+          Compartilhe com a torcida Tricolor!
+        </p>
+        <div className="flex items-center justify-center gap-3 sm:gap-4">
+          <button
+            onClick={() => handleShare("whatsapp")}
+            className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#25D366]/20 hover:bg-[#25D366]/30 flex items-center justify-center transition-colors touch-target touch-active"
+            aria-label="Compartilhar no WhatsApp"
+          >
+            <span className="text-xl sm:text-2xl">📱</span>
+          </button>
+          <button
+            onClick={() => handleShare("twitter")}
+            className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors touch-target touch-active"
+            aria-label="Compartilhar no Twitter"
+          >
+            <span className="text-xl sm:text-2xl">𝕏</span>
+          </button>
+          <button
+            onClick={() => handleShare("copy")}
+            className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors touch-target touch-active"
+            aria-label="Copiar texto"
+          >
+            <Share2 className="w-5 h-5 sm:w-6 sm:h-6" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
