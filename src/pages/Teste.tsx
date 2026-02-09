@@ -103,10 +103,51 @@ export default function Teste() {
       }
 
       if (data?.generatedImage) {
-        addLog(`✅ Sucesso! Tempo: ${elapsed}s`);
-        addLog(`Generation ID: ${data.generationId}`);
+        addLog(`✅ Sucesso direto! Tempo: ${elapsed}s`);
         setGeneratedImage(data.generatedImage);
         toast.success("Imagem gerada com sucesso!");
+      } else if (data?.queueId) {
+        addLog(`⏳ Geração iniciada na fila: ${data.queueId}`);
+        addLog(`Prediction: ${data.predictionId}`);
+        addLog("Aguardando resultado via polling...");
+        
+        // Poll the queue for result
+        const queueId = data.queueId;
+        const maxAttempts = 60;
+        for (let i = 0; i < maxAttempts; i++) {
+          await new Promise(r => setTimeout(r, 3000));
+          
+          const { createClient } = await import("@supabase/supabase-js");
+          const supabase = createClient(
+            "https://nosobqpiqhskkcfefbuw.supabase.co",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5vc29icXBpcWhza2tjZmVmYnV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzNDgzOTEsImV4cCI6MjA4NTkyNDM5MX0.WDUVbxOMNWKaG1pJ8iSf-FLWaSgWgKjnrFfxzMaJvqg"
+          );
+          
+          const { data: queue } = await supabase
+            .from("generation_queue")
+            .select("status, result_image_url, error_message")
+            .eq("id", queueId)
+            .single();
+          
+          if (!queue) {
+            addLog(`❌ Fila não encontrada`);
+            break;
+          }
+          
+          if (queue.status === "completed" && queue.result_image_url) {
+            const totalTime = ((Date.now() - startTime) / 1000).toFixed(1);
+            addLog(`✅ Sucesso! Tempo total: ${totalTime}s`);
+            setGeneratedImage(queue.result_image_url);
+            toast.success("Imagem gerada com sucesso!");
+            break;
+          } else if (queue.status === "failed") {
+            addLog(`❌ Falhou: ${queue.error_message}`);
+            toast.error(`Erro: ${queue.error_message}`);
+            break;
+          } else {
+            if (i % 5 === 0) addLog(`⏳ Polling... status: ${queue.status} (${i * 3}s)`);
+          }
+        }
       } else {
         addLog(`⚠️ Resposta inesperada: ${JSON.stringify(data)}`);
       }
