@@ -392,73 +392,6 @@ export const ResultScreen = ({
     }
   };
 
-  const getImageBlob = async (): Promise<File | null> => {
-    if (!generatedImage) return null;
-    try {
-      const isUrl = generatedImage.startsWith("http");
-      let imageToProcess = generatedImage;
-      
-      if (isUrl) {
-        const response = await fetch(generatedImage);
-        const blob = await response.blob();
-        imageToProcess = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
-        });
-      }
-      
-      const watermarked = await applyWatermark(imageToProcess);
-      const res = await fetch(watermarked);
-      const blob = await res.blob();
-      return new File([blob], `provador-tricolor-${Date.now()}.png`, { type: "image/png" });
-    } catch (err) {
-      console.error("Error creating image blob:", err);
-      return null;
-    }
-  };
-
-  const handleShare = async (platform: "whatsapp" | "instagram") => {
-    const shareText = "Olha eu vestindo o manto Tricolor! ❤️🤍🖤 #VaiSaoPaulo #Tricolor #ProvadorTricolor";
-    const file = await getImageBlob();
-
-    if (platform === "whatsapp") {
-      if (file && navigator.canShare?.({ files: [file] })) {
-        try {
-          await navigator.share({ text: shareText, files: [file] });
-          return;
-        } catch (e) {
-          if ((e as Error).name === "AbortError") return;
-        }
-      }
-      window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank");
-    } else if (platform === "instagram") {
-      if (file && navigator.canShare?.({ files: [file] })) {
-        try {
-          await navigator.share({ files: [file] });
-          return;
-        } catch (e) {
-          if ((e as Error).name === "AbortError") return;
-        }
-      }
-      // Fallback: download + instruction
-      if (file) {
-        const url = URL.createObjectURL(file);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = file.name;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      }
-      toast({
-        title: "Imagem salva!",
-        description: "Abra o Instagram e poste nos Stories 📸",
-      });
-    }
-  };
 
   const handleRetry = () => {
     setError(null);
@@ -598,28 +531,6 @@ export const ResultScreen = ({
         </Button>
       </div>
 
-      {/* Share Buttons */}
-      <div className="w-full max-w-md animate-fade-in" style={{ animationDelay: "0.4s" }}>
-        <p className="text-center text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
-          Compartilhe com a torcida Tricolor!
-        </p>
-        <div className="flex items-center justify-center gap-3 sm:gap-4">
-          <button
-            onClick={() => handleShare("instagram")}
-            className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] hover:opacity-80 flex items-center justify-center transition-opacity touch-target touch-active"
-            aria-label="Compartilhar no Instagram"
-          >
-            <span className="text-xl sm:text-2xl">📷</span>
-          </button>
-          <button
-            onClick={() => handleShare("whatsapp")}
-            className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#25D366]/20 hover:bg-[#25D366]/30 flex items-center justify-center transition-colors touch-target touch-active"
-            aria-label="Compartilhar no WhatsApp"
-          >
-            <span className="text-xl sm:text-2xl">💬</span>
-          </button>
-        </div>
-      </div>
     </div>
   );
 };
