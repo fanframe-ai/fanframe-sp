@@ -11,7 +11,7 @@ export const CreditsDisplay = ({ balance, isLoading, onRefresh }: CreditsDisplay
   return (
     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-background/40 backdrop-blur-md border border-border/30 text-sm">
       <div className="flex items-center gap-1.5">
-        <Coins className="w-3.5 h-3.5 text-success" />
+        <Coins className="w-3.5 h-3.5 text-destructive" />
         <span className="font-medium">
           {balance}
         </span>

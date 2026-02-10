@@ -150,7 +150,7 @@ const Index = () => {
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       {/* Credits Display */}
       {FANFRAME_ENABLED && (
-        <div className="fixed top-2 right-2 sm:top-4 sm:right-4 z-50 safe-top safe-right">
+        <div className="fixed top-10 right-2 sm:top-12 sm:right-4 z-50 safe-right">
           <CreditsDisplay 
             balance={balance} 
             isLoading={creditsLoading}
