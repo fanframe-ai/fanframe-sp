@@ -476,7 +476,7 @@ export const ResultScreen = ({
 
   // Success state
   return (
-    <div className="h-[100dvh] flex flex-col items-center px-4 pt-14 pb-4 safe-bottom overflow-hidden">
+    <div className="h-[100dvh] flex flex-col items-center px-4 pt-6 pb-4 safe-bottom overflow-hidden">
       {/* Header */}
       <div className="text-center mb-1 animate-fade-in">
         <h2 className="text-xl sm:text-2xl font-black mb-0.5 uppercase tracking-tight">
