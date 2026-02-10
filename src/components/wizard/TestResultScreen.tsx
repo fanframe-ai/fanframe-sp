@@ -250,7 +250,7 @@ export const TestResultScreen = ({
         <p className="text-muted-foreground text-xs sm:text-sm">Página de teste — sem débito de créditos.</p>
       </div>
 
-      <div className="w-full max-w-md flex-1 min-h-0 mb-2 animate-scale-in" style={{ animationDelay: "0.2s" }}>
+      <div className="w-full max-w-md flex-1 min-h-0 max-h-[55vh] mb-2 animate-scale-in" style={{ animationDelay: "0.2s" }}>
         <div className="glass-card p-1.5 rounded-xl h-full">
           <div className="rounded-lg overflow-hidden bg-secondary h-full">
             {generatedImage && (
