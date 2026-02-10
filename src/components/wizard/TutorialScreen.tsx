@@ -31,19 +31,19 @@ export const TutorialScreen = ({ onContinue, onBack }: TutorialScreenProps) => {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 pt-20 safe-bottom">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-4 pt-16 safe-bottom">
       {/* Header */}
-      <div className="text-center mb-6 sm:mb-12 animate-fade-in">
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-black mb-2 sm:mb-4 uppercase tracking-tight">
+      <div className="text-center mb-3 sm:mb-6 animate-fade-in">
+        <h2 className="text-xl sm:text-3xl md:text-4xl font-black mb-1 sm:mb-2 uppercase tracking-tight">
           Como funciona
         </h2>
-        <p className="text-muted-foreground text-sm sm:text-lg">
+        <p className="text-muted-foreground text-xs sm:text-lg">
           Em 3 passos, você se vê vestindo o manto.
         </p>
       </div>
 
       {/* Before/After Comparison */}
-      <div className="w-full max-w-lg mb-6 sm:mb-12 animate-fade-in" style={{ animationDelay: "0.1s" }}>
+      <div className="w-full max-w-sm sm:max-w-lg mb-3 sm:mb-8 animate-fade-in" style={{ animationDelay: "0.1s" }}>
         <div className="glass-card p-3 sm:p-4 rounded-2xl">
           <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center">
             {/* Before */}
@@ -87,7 +87,7 @@ export const TutorialScreen = ({ onContinue, onBack }: TutorialScreenProps) => {
       </div>
 
       {/* Steps - Horizontal on mobile */}
-      <div className="w-full max-w-4xl grid grid-cols-3 gap-2 sm:gap-4 mb-8 sm:mb-12 px-0 sm:px-4">
+      <div className="w-full max-w-4xl grid grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-8 px-0 sm:px-4">
         {steps.map((step, index) => (
           <div
             key={step.number}

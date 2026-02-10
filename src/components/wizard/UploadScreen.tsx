@@ -142,19 +142,19 @@ export const UploadScreen = ({
   );
 
   return (
-    <div className="min-h-screen flex flex-col items-center px-4 py-8 pt-20 safe-bottom">
+    <div className="min-h-screen flex flex-col items-center px-4 py-4 pt-16 safe-bottom">
       {/* Header */}
-      <div className="text-center mb-6 sm:mb-10 animate-fade-in">
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-black mb-2 sm:mb-4 uppercase tracking-tight">
+      <div className="text-center mb-3 sm:mb-6 animate-fade-in">
+        <h2 className="text-xl sm:text-3xl md:text-4xl font-black mb-1 sm:mb-2 uppercase tracking-tight">
           Agora, sua foto
         </h2>
-        <p className="text-muted-foreground text-sm sm:text-lg">
+        <p className="text-muted-foreground text-xs sm:text-lg">
           Corpo inteiro, roupa clara
         </p>
       </div>
 
       {/* Upload Area */}
-      <div className="w-full max-w-md mb-6 sm:mb-10 animate-fade-in" style={{ animationDelay: "0.1s" }}>
+      <div className="w-full max-w-md mb-4 sm:mb-6 animate-fade-in" style={{ animationDelay: "0.1s" }}>
         {isConverting ? (
           <div className="glass-card p-8 rounded-2xl flex flex-col items-center justify-center">
             <Loader2 className="w-12 h-12 animate-spin text-white mb-4" />
