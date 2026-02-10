@@ -102,11 +102,11 @@ export const BuyCreditsScreen = ({
           <div
             key={pkg.credits}
             className={`glass-card p-4 sm:p-5 rounded-xl relative ${
-              pkg.highlight ? "ring-2 ring-success" : ""
+              pkg.highlight ? "ring-2 ring-destructive" : ""
             }`}
           >
             {pkg.badge && (
-              <span className="absolute -top-2 right-3 sm:right-4 px-2 py-0.5 text-[10px] sm:text-xs font-bold bg-success text-white rounded-full whitespace-nowrap">
+              <span className="absolute -top-2 right-3 sm:right-4 px-2 py-0.5 text-[10px] sm:text-xs font-bold bg-destructive text-white rounded-full whitespace-nowrap">
                 {pkg.badge}
               </span>
             )}
@@ -122,7 +122,7 @@ export const BuyCreditsScreen = ({
                 onClick={(e) => handlePurchaseClick(pkg, e)}
                 className={`inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-9 px-4 py-2 touch-target flex-shrink-0 ${
                   pkg.highlight 
-                    ? "bg-success text-white hover:bg-success/90" 
+                    ? "bg-destructive text-white hover:bg-destructive/90" 
                     : "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground"
                 }`}
               >
