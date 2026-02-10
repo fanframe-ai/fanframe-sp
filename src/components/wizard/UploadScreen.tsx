@@ -142,7 +142,7 @@ export const UploadScreen = ({
   );
 
   return (
-    <div className="h-[100dvh] flex flex-col items-center justify-center px-4 pt-14 pb-4 safe-bottom overflow-hidden">
+    <div className="h-[100dvh] flex flex-col items-center justify-center px-4 pt-10 pb-4 safe-bottom overflow-hidden">
       {/* Header */}
       <div className="text-center mb-3 sm:mb-4 animate-fade-in shrink-0">
         <h2 className="text-xl sm:text-3xl md:text-4xl font-black mb-1 sm:mb-2 uppercase tracking-tight">

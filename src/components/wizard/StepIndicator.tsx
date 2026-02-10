@@ -26,10 +26,10 @@ export const StepIndicator = ({ currentStep, totalSteps, labels }: StepIndicator
             const isCompleted = stepNumber < currentStep;
             
             return (
-              <div key={i} className="flex flex-col items-center gap-1">
+              <div key={i} className="flex flex-col items-center gap-0.5">
                 <div
                   className={cn(
-                    "w-3 h-3 rounded-full transition-all duration-300",
+                    "w-2 h-2 rounded-full transition-all duration-300",
                     isActive && "bg-white scale-125",
                     isCompleted && "bg-white/60",
                     !isActive && !isCompleted && "bg-white/20"
@@ -39,7 +39,7 @@ export const StepIndicator = ({ currentStep, totalSteps, labels }: StepIndicator
                 {labels && labels[i] && (
                   <span 
                     className={cn(
-                      "text-[10px] uppercase tracking-wider transition-all duration-300",
+                      "text-[8px] uppercase tracking-wider transition-all duration-300",
                       "hidden sm:block", // Hide all on mobile by default
                       isActive && "!block text-white font-semibold", // Show current on mobile
                       isCompleted && "text-white/60",
