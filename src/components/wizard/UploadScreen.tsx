@@ -156,20 +156,20 @@ export const UploadScreen = ({
       {/* Upload Area */}
       <div className={cn(
         "w-full max-w-md mb-3 sm:mb-4 animate-fade-in",
-        uploadedImage ? "flex-1 min-h-0 max-h-[40vh]" : ""
+        uploadedImage ? "flex-1 min-h-0 max-h-[35vh]" : ""
       )} style={{ animationDelay: "0.1s" }}>
         {isConverting ? (
-          <div className="glass-card p-8 rounded-2xl flex flex-col items-center justify-center">
-            <Loader2 className="w-12 h-12 animate-spin text-white mb-4" />
-            <p className="text-sm text-muted-foreground">Processando imagem...</p>
+          <div className="glass-card p-4 rounded-2xl flex flex-col items-center justify-center">
+            <Loader2 className="w-10 h-10 animate-spin text-white mb-3" />
+            <p className="text-xs text-muted-foreground">Processando imagem...</p>
           </div>
         ) : uploadedImage ? (
-          <div className="relative glass-card p-2 sm:p-3 rounded-2xl h-full flex flex-col">
-            <div className="relative rounded-xl overflow-hidden flex-1 min-h-0">
+          <div className="relative glass-card p-1.5 sm:p-2 rounded-xl h-full flex flex-col">
+            <div className="relative rounded-lg overflow-hidden flex-1 min-h-0">
               <img
                 src={uploadedImage}
                 alt="Uploaded preview"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
               />
               <button
                 onClick={onClearImage}
