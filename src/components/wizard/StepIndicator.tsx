@@ -9,9 +9,9 @@ interface StepIndicatorProps {
 export const StepIndicator = ({ currentStep, totalSteps, labels }: StepIndicatorProps) => {
   return (
     <div className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-white/10 safe-top">
-      <div className="max-w-2xl mx-auto px-4 py-3">
+      <div className="max-w-2xl mx-auto px-4 py-1.5">
         {/* Progress bar */}
-        <div className="relative h-1 bg-white/10 rounded-full overflow-hidden mb-2">
+        <div className="relative h-0.5 bg-white/10 rounded-full overflow-hidden mb-1">
           <div 
             className="absolute top-0 left-0 h-full bg-white rounded-full transition-all duration-500 ease-out"
             style={{ width: `${(currentStep / totalSteps) * 100}%` }}
