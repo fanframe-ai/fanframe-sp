@@ -142,7 +142,7 @@ export const UploadScreen = ({
   );
 
   return (
-    <div className="min-h-screen flex flex-col items-center px-4 py-4 pt-16 safe-bottom">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-4 pt-16 safe-bottom">
       {/* Header */}
       <div className="text-center mb-3 sm:mb-6 animate-fade-in">
         <h2 className="text-xl sm:text-3xl md:text-4xl font-black mb-1 sm:mb-2 uppercase tracking-tight">
@@ -271,7 +271,7 @@ export const UploadScreen = ({
       )}
 
       {/* CTAs - Stack on mobile */}
-      <div className="flex flex-col gap-3 w-full max-w-md px-0 animate-fade-in mt-auto" style={{ animationDelay: "0.3s" }}>
+      <div className="flex flex-col gap-3 w-full max-w-md px-0 animate-fade-in" style={{ animationDelay: "0.3s" }}>
         <Button
           onClick={onContinue}
           disabled={!uploadedImage || isConverting || !hasConsented || isLoggingConsent}
