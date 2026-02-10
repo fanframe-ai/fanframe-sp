@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { WelcomeScreen } from "@/components/wizard/WelcomeScreen";
 import { TutorialScreen } from "@/components/wizard/TutorialScreen";
-import { ShirtSelectionScreen, type Shirt, type Background } from "@/components/wizard/ShirtSelectionScreen";
+import { ShirtSelectionScreen, type Shirt } from "@/components/wizard/ShirtSelectionScreen";
+import { BackgroundSelectionScreen } from "@/components/wizard/BackgroundSelectionScreen";
 import { UploadScreen } from "@/components/wizard/UploadScreen";
 import { ResultScreen } from "@/components/wizard/ResultScreen";
 import { BuyCreditsScreen } from "@/components/wizard/BuyCreditsScreen";
@@ -10,14 +11,14 @@ import { StepIndicator } from "@/components/wizard/StepIndicator";
 import { CreditsDisplay } from "@/components/CreditsDisplay";
 import { useFanFrameAuth } from "@/hooks/useFanFrameAuth";
 import { useFanFrameCredits } from "@/hooks/useFanFrameCredits";
-import { FANFRAME_ENABLED } from "@/config/fanframe";
+import { FANFRAME_ENABLED, type Background } from "@/config/fanframe";
 import { Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
-type WizardStep = "welcome" | "buy-credits" | "tutorial" | "shirt" | "upload" | "result";
+type WizardStep = "welcome" | "buy-credits" | "tutorial" | "shirt" | "background" | "upload" | "result";
 
-const STEP_ORDER: WizardStep[] = ["welcome", "buy-credits", "tutorial", "shirt", "upload", "result"];
-const STEP_LABELS = ["Início", "Créditos", "Como funciona", "Escolha", "Foto", "Resultado"];
+const STEP_ORDER: WizardStep[] = ["welcome", "buy-credits", "tutorial", "shirt", "background", "upload", "result"];
+const STEP_LABELS = ["Início", "Créditos", "Tutorial", "Manto", "Cenário", "Foto", "Resultado"];
 
 const Index = () => {
   const [currentStep, setCurrentStep] = useState<WizardStep>("welcome");
@@ -191,6 +192,13 @@ const Index = () => {
         <ShirtSelectionScreen
           selectedShirt={selectedShirt}
           onSelectShirt={handleShirtSelect}
+          onContinue={() => goToStep("background")}
+          onBack={() => goToStep("tutorial")}
+        />
+      )}
+
+      {currentStep === "background" && (
+        <BackgroundSelectionScreen
           selectedBackground={selectedBackground}
           onSelectBackground={handleBackgroundSelect}
           onContinue={() => {
@@ -200,7 +208,7 @@ const Index = () => {
             }
             goToStep("upload");
           }}
-          onBack={() => goToStep("tutorial")}
+          onBack={() => goToStep("shirt")}
         />
       )}
 
@@ -216,7 +224,7 @@ const Index = () => {
             }
             goToStep("result");
           }}
-          onBack={() => goToStep("shirt")}
+          onBack={() => goToStep("background")}
         />
       )}
 

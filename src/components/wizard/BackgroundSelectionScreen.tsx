@@ -1,74 +1,38 @@
 import { Button } from "@/components/ui/button";
 import { Check, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ASSET_URLS } from "@/config/fanframe";
+import { BACKGROUNDS, type Background } from "@/config/fanframe";
 
-export interface Shirt {
-  id: string;
-  name: string;
-  subtitle: string;
-  imageUrl: string;
-  assetPath: string;
-  promptDescription: string;
-}
-
-export const SHIRTS: Shirt[] = [
-  {
-    id: "manto-1",
-    name: "Manto I – O Soberano",
-    subtitle: "O clássico tricolor que carrega a história",
-    imageUrl: ASSET_URLS.shirts["manto-1"],
-    assetPath: ASSET_URLS.shirts["manto-1"],
-    promptDescription: "white São Paulo FC soccer jersey with red and black horizontal stripes, New Balance logo on chest, São Paulo team crest in center, classic tricolor design",
-  },
-  {
-    id: "manto-2",
-    name: "Manto II – Tricolor Paulista",
-    subtitle: "A força que vem da torcida",
-    imageUrl: ASSET_URLS.shirts["manto-2"],
-    assetPath: ASSET_URLS.shirts["manto-2"],
-    promptDescription: "red São Paulo FC away soccer jersey with white and black accents, New Balance logo on chest, São Paulo team crest in center",
-  },
-  {
-    id: "manto-3",
-    name: "Manto III – O Mais Querido",
-    subtitle: "Atitude e paixão tricolor",
-    imageUrl: ASSET_URLS.shirts["manto-3"],
-    assetPath: ASSET_URLS.shirts["manto-3"],
-    promptDescription: "black São Paulo FC third jersey with red and white details, New Balance logo on chest, São Paulo team crest",
-  },
-];
-
-interface ShirtSelectionScreenProps {
-  selectedShirt: Shirt | null;
-  onSelectShirt: (shirt: Shirt) => void;
+interface BackgroundSelectionScreenProps {
+  selectedBackground: Background | null;
+  onSelectBackground: (background: Background) => void;
   onContinue: () => void;
   onBack: () => void;
 }
 
-export const ShirtSelectionScreen = ({
-  selectedShirt,
-  onSelectShirt,
+export const BackgroundSelectionScreen = ({
+  selectedBackground,
+  onSelectBackground,
   onContinue,
   onBack,
-}: ShirtSelectionScreenProps) => {
-  const canContinue = selectedShirt !== null;
+}: BackgroundSelectionScreenProps) => {
+  const canContinue = selectedBackground !== null;
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-4 pt-16 safe-bottom">
       <div className="text-center mb-4 animate-fade-in">
         <h2 className="text-xl sm:text-2xl md:text-3xl font-black mb-1 uppercase tracking-tight px-2">
-          Qual manto você vai vestir?
+          Escolha o cenário
         </h2>
       </div>
 
       <div className="w-full max-w-lg grid grid-cols-1 gap-2 sm:gap-3 mb-6">
-        {SHIRTS.map((shirt, index) => {
-          const isSelected = selectedShirt?.id === shirt.id;
+        {BACKGROUNDS.map((background, index) => {
+          const isSelected = selectedBackground?.id === background.id;
           return (
             <button
-              key={shirt.id}
-              onClick={() => onSelectShirt(shirt)}
+              key={background.id}
+              onClick={() => onSelectBackground(background)}
               className={cn(
                 "relative p-2.5 sm:p-3 rounded-xl transition-all duration-300 animate-fade-in text-left touch-active",
                 isSelected ? "glass-card-selected scale-[1.02]" : "glass-card hover:bg-white/10"
@@ -76,21 +40,21 @@ export const ShirtSelectionScreen = ({
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <div className="flex items-center gap-2.5 sm:gap-3">
-                <div className="relative flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-white">
+                <div className="relative flex-shrink-0 w-20 h-14 sm:w-24 sm:h-16 rounded-lg overflow-hidden bg-secondary">
                   <img
-                    src={shirt.imageUrl}
-                    alt={shirt.name}
-                    width={80}
-                    height={80}
+                    src={background.imageUrl}
+                    alt={background.name}
+                    width={96}
+                    height={64}
                     loading="lazy"
                     decoding="async"
                     className="w-full h-full object-cover"
                   />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-sm sm:text-base uppercase mb-0.5 truncate">{shirt.name}</h3>
+                  <h3 className="font-bold text-sm sm:text-base uppercase mb-0.5 truncate">{background.name}</h3>
                   <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
-                    {shirt.subtitle}
+                    {background.subtitle}
                   </p>
                 </div>
                 <div
@@ -107,7 +71,7 @@ export const ShirtSelectionScreen = ({
         })}
       </div>
 
-      <div className="flex flex-col gap-3 w-full max-w-md px-4 sm:px-0 animate-fade-in" style={{ animationDelay: "0.3s" }}>
+      <div className="flex flex-col gap-3 w-full max-w-md px-4 sm:px-0 animate-fade-in" style={{ animationDelay: "0.4s" }}>
         <Button
           onClick={onContinue}
           disabled={!canContinue}
