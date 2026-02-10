@@ -1,47 +1,21 @@
 
 
-## Otimizacao das Telas para Nao Precisar Rolar
+## Compactar a barra de steps (StepIndicator)
 
-### Problema Atual
-As telas do wizard exigem scroll no celular, especialmente a tela de selecao que combina camisas + cenarios em uma unica tela longa.
+Reduzir o tamanho da barra de progresso no topo para liberar mais espaco vertical para o conteudo das telas, especialmente a tela de upload com foto.
 
-### O que sera feito
+### Alteracoes em `src/components/wizard/StepIndicator.tsx`
 
-**1. Dividir a tela de selecao em duas telas separadas**
-- **Tela "shirt"**: Apenas selecao de camisa (3 opcoes) + botoes Continuar/Voltar
-- **Nova tela "background"**: Apenas selecao de cenario (4 opcoes) + botoes Continuar/Voltar
-- Criar novo componente `BackgroundSelectionScreen.tsx` extraido do `ShirtSelectionScreen.tsx`
-- `ShirtSelectionScreen` passa a ter apenas camisas, sem props de background
+- Reduzir padding vertical do container de `py-3` para `py-1.5`
+- Reduzir altura da progress bar de `h-1` para `h-0.5`
+- Reduzir margem inferior da progress bar de `mb-2` para `mb-1`
+- Reduzir tamanho dos dots de `w-3 h-3` para `w-2 h-2`
+- Reduzir tamanho das labels de `text-[10px]` para `text-[8px]`
+- Reduzir gap entre dot e label de `gap-1` para `gap-0.5`
 
-**2. Atualizar o fluxo do wizard no Index.tsx**
-- Adicionar o step "background" no `STEP_ORDER` entre "shirt" e "upload"
-- Atualizar `STEP_LABELS` para incluir o novo passo
-- Navegacao: tutorial -> shirt -> background -> upload -> result
-- O `StepIndicator` se ajusta automaticamente (agora 7 steps)
+### Alteracao em `src/components/wizard/UploadScreen.tsx`
 
-**3. Otimizar espacamentos em todas as telas**
-- Reduzir paddings verticais (`py-8` -> `py-4`, `pt-20` -> `pt-16`)
-- Reduzir margens entre secoes (`mb-6` -> `mb-4`, etc.)
-- Usar `justify-center` ou `justify-between` nos containers flex para centralizar o conteudo na viewport sem scroll
-- Ajustar `min-h-screen` com `justify-center` onde fizer sentido (WelcomeScreen ja faz isso bem)
+- Reduzir `pt-14` para `pt-10` para acompanhar a barra menor
 
-**4. Telas afetadas e ajustes especificos**
-- **TutorialScreen**: Reduzir tamanho do before/after e espacamentos para caber na tela
-- **ShirtSelectionScreen**: Remover secao de backgrounds, ajustar para caber sem scroll
-- **BackgroundSelectionScreen** (novo): Layout similar ao de camisas, compacto
-- **UploadScreen**: Reduzir espacamentos do header e area de upload
-- **BuyCreditsScreen**: Reduzir espacamentos entre pacotes
-
-### Detalhes Tecnicos
-
-**Novo arquivo:** `src/components/wizard/BackgroundSelectionScreen.tsx`
-- Recebe props: `selectedBackground`, `onSelectBackground`, `onContinue`, `onBack`
-- Lista os 4 backgrounds com cards selecionaveis (mesmo estilo dos cards de camisa)
-
-**Arquivos modificados:**
-- `src/components/wizard/ShirtSelectionScreen.tsx` - remover backgrounds, ajustar espacamentos
-- `src/pages/Index.tsx` - adicionar step "background", importar novo componente, atualizar navegacao
-- `src/components/wizard/TutorialScreen.tsx` - reduzir espacamentos
-- `src/components/wizard/UploadScreen.tsx` - reduzir espacamentos
-- `src/components/wizard/BuyCreditsScreen.tsx` - reduzir espacamentos
+Nenhum arquivo novo sera criado. Apenas dois arquivos editados.
 
