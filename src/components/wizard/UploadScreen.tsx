@@ -142,21 +142,24 @@ export const UploadScreen = ({
   );
 
   return (
-    <div className="h-[100dvh] flex flex-col items-center justify-between px-4 py-2 pt-14 pb-4 safe-bottom overflow-hidden">
+    <div className="h-[100dvh] flex flex-col items-center justify-center px-4 pt-14 pb-4 safe-bottom overflow-hidden">
       {/* Header */}
-      <div className="text-center mb-1 sm:mb-3 animate-fade-in shrink-0">
-        <h2 className="text-lg sm:text-3xl md:text-4xl font-black mb-0.5 sm:mb-2 uppercase tracking-tight">
+      <div className="text-center mb-3 sm:mb-4 animate-fade-in shrink-0">
+        <h2 className="text-xl sm:text-3xl md:text-4xl font-black mb-1 sm:mb-2 uppercase tracking-tight">
           Agora, sua foto
         </h2>
-        <p className="text-muted-foreground text-[11px] sm:text-lg">
+        <p className="text-muted-foreground text-xs sm:text-lg">
           Corpo inteiro, roupa clara
         </p>
       </div>
 
       {/* Upload Area */}
-      <div className="w-full max-w-md mb-2 sm:mb-4 animate-fade-in flex-1 min-h-0" style={{ animationDelay: "0.1s" }}>
+      <div className={cn(
+        "w-full max-w-md mb-3 sm:mb-4 animate-fade-in",
+        uploadedImage ? "flex-1 min-h-0" : ""
+      )} style={{ animationDelay: "0.1s" }}>
         {isConverting ? (
-          <div className="glass-card p-8 rounded-2xl flex flex-col items-center justify-center h-full">
+          <div className="glass-card p-8 rounded-2xl flex flex-col items-center justify-center">
             <Loader2 className="w-12 h-12 animate-spin text-white mb-4" />
             <p className="text-sm text-muted-foreground">Processando imagem...</p>
           </div>
@@ -213,7 +216,7 @@ export const UploadScreen = ({
 
       {/* Consent Checkbox - Only show when image is uploaded */}
       {uploadedImage && !isConverting && (
-        <div className="w-full max-w-md mb-2 animate-fade-in shrink-0" style={{ animationDelay: "0.2s" }}>
+        <div className="w-full max-w-md mb-3 animate-fade-in shrink-0" style={{ animationDelay: "0.2s" }}>
           <div className="glass-card p-3 sm:p-4 rounded-xl">
             <div className="flex items-start gap-2">
               <Checkbox
@@ -253,9 +256,9 @@ export const UploadScreen = ({
         </div>
       )}
 
-      {/* Tips */}
+      {/* Tips - only without image */}
       {!uploadedImage && !isConverting && (
-        <div className="w-full max-w-md mb-6 sm:mb-10 animate-fade-in" style={{ animationDelay: "0.2s" }}>
+        <div className="w-full max-w-md mb-4 animate-fade-in" style={{ animationDelay: "0.2s" }}>
           <div className="glass-card p-4 sm:p-5 rounded-xl">
             <h4 className="font-bold text-xs sm:text-sm uppercase mb-2 sm:mb-3">Dicas para melhor resultado</h4>
             <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-muted-foreground">
