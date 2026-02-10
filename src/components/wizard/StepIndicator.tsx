@@ -9,9 +9,9 @@ interface StepIndicatorProps {
 export const StepIndicator = ({ currentStep, totalSteps, labels }: StepIndicatorProps) => {
   return (
     <div className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-white/10 safe-top">
-      <div className="max-w-2xl mx-auto px-4 py-3">
+      <div className="max-w-2xl mx-auto px-4 py-1.5">
         {/* Progress bar */}
-        <div className="relative h-1 bg-white/10 rounded-full overflow-hidden mb-2">
+        <div className="relative h-0.5 bg-white/10 rounded-full overflow-hidden mb-1">
           <div 
             className="absolute top-0 left-0 h-full bg-white rounded-full transition-all duration-500 ease-out"
             style={{ width: `${(currentStep / totalSteps) * 100}%` }}
@@ -26,10 +26,10 @@ export const StepIndicator = ({ currentStep, totalSteps, labels }: StepIndicator
             const isCompleted = stepNumber < currentStep;
             
             return (
-              <div key={i} className="flex flex-col items-center gap-1">
+              <div key={i} className="flex flex-col items-center gap-0.5">
                 <div
                   className={cn(
-                    "w-3 h-3 rounded-full transition-all duration-300",
+                    "w-2 h-2 rounded-full transition-all duration-300",
                     isActive && "bg-white scale-125",
                     isCompleted && "bg-white/60",
                     !isActive && !isCompleted && "bg-white/20"
@@ -39,7 +39,7 @@ export const StepIndicator = ({ currentStep, totalSteps, labels }: StepIndicator
                 {labels && labels[i] && (
                   <span 
                     className={cn(
-                      "text-[10px] uppercase tracking-wider transition-all duration-300",
+                      "text-[8px] uppercase tracking-wider transition-all duration-300",
                       "hidden sm:block", // Hide all on mobile by default
                       isActive && "!block text-white font-semibold", // Show current on mobile
                       isCompleted && "text-white/60",
