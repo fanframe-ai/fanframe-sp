@@ -244,8 +244,8 @@ export const TestResultScreen = ({
   }
 
   return (
-    <div className="h-[100dvh] flex flex-col items-center px-4 pt-14 pb-4 safe-bottom overflow-hidden">
-      <div className="text-center mb-2 animate-fade-in">
+    <div className="h-[100dvh] flex flex-col items-center px-4 pt-6 pb-4 safe-bottom overflow-hidden">
+      <div className="text-center mb-3 animate-fade-in">
         <h2 className="text-xl sm:text-2xl font-black mb-0.5 uppercase tracking-tight">Ficou épico!</h2>
         <p className="text-muted-foreground text-xs sm:text-sm">Página de teste — sem débito de créditos.</p>
       </div>
