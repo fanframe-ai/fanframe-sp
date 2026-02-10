@@ -142,27 +142,27 @@ export const UploadScreen = ({
   );
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-4 pt-16 safe-bottom">
+    <div className="h-[100dvh] flex flex-col items-center justify-between px-4 py-2 pt-14 pb-4 safe-bottom overflow-hidden">
       {/* Header */}
-      <div className="text-center mb-3 sm:mb-6 animate-fade-in">
-        <h2 className="text-xl sm:text-3xl md:text-4xl font-black mb-1 sm:mb-2 uppercase tracking-tight">
+      <div className="text-center mb-1 sm:mb-3 animate-fade-in shrink-0">
+        <h2 className="text-lg sm:text-3xl md:text-4xl font-black mb-0.5 sm:mb-2 uppercase tracking-tight">
           Agora, sua foto
         </h2>
-        <p className="text-muted-foreground text-xs sm:text-lg">
+        <p className="text-muted-foreground text-[11px] sm:text-lg">
           Corpo inteiro, roupa clara
         </p>
       </div>
 
       {/* Upload Area */}
-      <div className="w-full max-w-md mb-4 sm:mb-6 animate-fade-in" style={{ animationDelay: "0.1s" }}>
+      <div className="w-full max-w-md mb-2 sm:mb-4 animate-fade-in flex-1 min-h-0" style={{ animationDelay: "0.1s" }}>
         {isConverting ? (
-          <div className="glass-card p-8 rounded-2xl flex flex-col items-center justify-center">
+          <div className="glass-card p-8 rounded-2xl flex flex-col items-center justify-center h-full">
             <Loader2 className="w-12 h-12 animate-spin text-white mb-4" />
             <p className="text-sm text-muted-foreground">Processando imagem...</p>
           </div>
         ) : uploadedImage ? (
-          <div className="relative glass-card p-3 sm:p-4 rounded-2xl">
-            <div className="relative aspect-[3/4] rounded-xl overflow-hidden">
+          <div className="relative glass-card p-2 sm:p-3 rounded-2xl h-full flex flex-col">
+            <div className="relative rounded-xl overflow-hidden flex-1 min-h-0">
               <img
                 src={uploadedImage}
                 alt="Uploaded preview"
@@ -170,14 +170,11 @@ export const UploadScreen = ({
               />
               <button
                 onClick={onClearImage}
-                className="absolute top-2 right-2 sm:top-3 sm:right-3 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/70 backdrop-blur flex items-center justify-center hover:bg-black transition-colors touch-target"
+                className="absolute top-2 right-2 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-black/70 backdrop-blur flex items-center justify-center hover:bg-black transition-colors touch-target"
               >
-                <X className="w-5 h-5 sm:w-6 sm:h-6" />
+                <X className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
-            <p className="text-center text-xs sm:text-sm text-muted-foreground mt-3 sm:mt-4">
-              Foto selecionada! Bora vestir o manto.
-            </p>
           </div>
         ) : (
           <label
@@ -216,9 +213,9 @@ export const UploadScreen = ({
 
       {/* Consent Checkbox - Only show when image is uploaded */}
       {uploadedImage && !isConverting && (
-        <div className="w-full max-w-md mb-6 animate-fade-in" style={{ animationDelay: "0.2s" }}>
-          <div className="glass-card p-4 sm:p-5 rounded-xl">
-            <div className="flex items-start gap-3">
+        <div className="w-full max-w-md mb-2 animate-fade-in shrink-0" style={{ animationDelay: "0.2s" }}>
+          <div className="glass-card p-3 sm:p-4 rounded-xl">
+            <div className="flex items-start gap-2">
               <Checkbox
                 id="consent"
                 checked={hasConsented}
@@ -233,13 +230,13 @@ export const UploadScreen = ({
                   setHasConsented(checked === true);
                 }}
                 disabled={isLoggingConsent}
-                className="mt-1 h-5 w-5 border-white/50 data-[state=checked]:bg-white data-[state=checked]:text-black"
+                className="mt-0.5 h-4 w-4 border-white/50 data-[state=checked]:bg-white data-[state=checked]:text-black"
               />
               <label
                 htmlFor="consent"
-                className="text-xs sm:text-sm text-muted-foreground leading-relaxed cursor-pointer"
+                className="text-[10px] sm:text-xs text-muted-foreground leading-snug cursor-pointer"
               >
-                Declaro que sou o titular da imagem ou possuo autorização das pessoas nela presentes, que a imagem não contém conteúdo ilegal, ofensivo ou impróprio, e que será utilizada para gerar uma foto com a camisa oficial do clube. Assumo total responsabilidade por seu uso, isentando a Virtual Fans e o clube, e concordo com o{" "}
+                Declaro que sou o titular da imagem, que não contém conteúdo ilegal ou impróprio, e concordo com o{" "}
                 <a
                   href="/termos-de-uso"
                   target="_blank"
@@ -270,32 +267,32 @@ export const UploadScreen = ({
         </div>
       )}
 
-      {/* CTAs - Stack on mobile */}
-      <div className="flex flex-col gap-3 w-full max-w-md px-0 animate-fade-in" style={{ animationDelay: "0.3s" }}>
+      {/* CTAs */}
+      <div className="flex gap-2 w-full max-w-md shrink-0 animate-fade-in" style={{ animationDelay: "0.3s" }}>
+        <Button
+          onClick={onBack}
+          size="sm"
+          variant="outline"
+          disabled={isConverting || isLoggingConsent}
+          className="border-white/30 hover:bg-white/10 transition-all flex-shrink-0"
+        >
+          <ArrowLeft className="w-4 h-4 mr-1" />
+          VOLTAR
+        </Button>
         <Button
           onClick={onContinue}
           disabled={!uploadedImage || isConverting || !hasConsented || isLoggingConsent}
-          size="lg"
-          className="btn-mobile-cta bg-white text-black hover:bg-white/90 transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 order-1"
+          size="sm"
+          className="flex-1 bg-white text-black hover:bg-white/90 transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
         >
           {isLoggingConsent ? (
             <>
-              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+              <Loader2 className="w-4 h-4 mr-1 animate-spin" />
               PROCESSANDO...
             </>
           ) : (
             "VESTIR O MANTO"
           )}
-        </Button>
-        <Button
-          onClick={onBack}
-          size="lg"
-          variant="outline"
-          disabled={isConverting || isLoggingConsent}
-          className="btn-mobile border-white/30 hover:bg-white/10 transition-all order-2"
-        >
-          <ArrowLeft className="w-5 h-5 mr-2" />
-          VOLTAR
         </Button>
       </div>
     </div>
