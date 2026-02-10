@@ -75,14 +75,14 @@ export interface Background {
 
 // Asset URLs from Supabase Storage (permanent, publicly accessible)
 export const ASSET_URLS = {
-  background: `${STORAGE_BASE}/backgrounds/morumbi.webp`,
+  background: `${STORAGE_BASE}/backgrounds/mural.png`,
   shirts: {
     "manto-1": `${STORAGE_BASE}/shirts/manto-1.png`,
     "manto-2": `${STORAGE_BASE}/shirts/manto-2.png`,
     "manto-3": `${STORAGE_BASE}/shirts/manto-3.png`,
   },
   backgrounds: {
-    "morumbi": `${STORAGE_BASE}/backgrounds/morumbi.webp`,
+    "mural": `${STORAGE_BASE}/backgrounds/mural.png`,
     "memorial": `${STORAGE_BASE}/backgrounds/memorial.jpg`,
     "idolos": `${STORAGE_BASE}/backgrounds/idolos.jpg`,
     "trofeus": `${STORAGE_BASE}/backgrounds/trofeus.jpg`,
@@ -91,11 +91,11 @@ export const ASSET_URLS = {
 
 export const BACKGROUNDS: Background[] = [
   {
-    id: "morumbi",
-    name: "Estádio Morumbi",
-    subtitle: "A casa do Tricolor Paulista",
-    imageUrl: ASSET_URLS.backgrounds["morumbi"],
-    assetPath: ASSET_URLS.backgrounds["morumbi"],
+    id: "mural",
+    name: "Mural dos Ídolos",
+    subtitle: "Os maiores craques do Tricolor",
+    imageUrl: ASSET_URLS.backgrounds["mural"],
+    assetPath: ASSET_URLS.backgrounds["mural"],
   },
   {
     id: "memorial",
