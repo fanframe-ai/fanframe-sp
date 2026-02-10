@@ -274,19 +274,19 @@ export const UploadScreen = ({
       <div className="flex gap-2 w-full max-w-md shrink-0 animate-fade-in" style={{ animationDelay: "0.3s" }}>
         <Button
           onClick={onBack}
-          size="sm"
+          size="lg"
           variant="outline"
           disabled={isConverting || isLoggingConsent}
-          className="border-white/30 hover:bg-white/10 transition-all flex-shrink-0"
+          className="border-white/30 hover:bg-white/10 transition-all flex-shrink-0 h-12 px-5 text-base"
         >
-          <ArrowLeft className="w-4 h-4 mr-1" />
+          <ArrowLeft className="w-5 h-5 mr-1" />
           VOLTAR
         </Button>
         <Button
           onClick={onContinue}
           disabled={!uploadedImage || isConverting || !hasConsented || isLoggingConsent}
-          size="sm"
-          className="flex-1 bg-white text-black hover:bg-white/90 transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
+          size="lg"
+          className="flex-1 bg-white text-black hover:bg-white/90 transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 h-12 text-base font-bold"
         >
           {isLoggingConsent ? (
             <>
