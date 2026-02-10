@@ -244,29 +244,29 @@ export const TestResultScreen = ({
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center px-4 py-8 safe-bottom">
-      <div className="text-center mb-4 sm:mb-6 animate-fade-in">
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-black mb-1 sm:mb-2 uppercase tracking-tight">Ficou épico!</h2>
-        <p className="text-muted-foreground text-sm sm:text-base">Página de teste — sem débito de créditos.</p>
+    <div className="h-[100dvh] flex flex-col items-center px-4 pt-14 pb-4 safe-bottom overflow-hidden">
+      <div className="text-center mb-2 animate-fade-in">
+        <h2 className="text-xl sm:text-2xl font-black mb-0.5 uppercase tracking-tight">Ficou épico!</h2>
+        <p className="text-muted-foreground text-xs sm:text-sm">Página de teste — sem débito de créditos.</p>
       </div>
 
-      <div className="w-full max-w-md mb-6 sm:mb-8 animate-scale-in" style={{ animationDelay: "0.2s" }}>
-        <div className="glass-card p-3 sm:p-4 rounded-2xl">
-          <div className="aspect-[3/4] rounded-xl overflow-hidden bg-secondary">
+      <div className="w-full max-w-md flex-1 min-h-0 mb-2 animate-scale-in" style={{ animationDelay: "0.2s" }}>
+        <div className="glass-card p-1.5 rounded-xl h-full">
+          <div className="rounded-lg overflow-hidden bg-secondary h-full">
             {generatedImage && (
-              <img src={generatedImage} alt="Resultado" className="w-full h-full object-cover" />
+              <img src={generatedImage} alt="Resultado" className="w-full h-full object-contain" />
             )}
           </div>
         </div>
       </div>
 
-      <div className="w-full max-w-md space-y-3 mb-6 sm:mb-8 animate-fade-in" style={{ animationDelay: "0.3s" }}>
-        <Button onClick={handleDownload} size="lg" className="w-full btn-mobile-cta bg-white text-black hover:bg-white/90 transition-all">
-          <Download className="w-5 h-5 mr-2" />
+      <div className="w-full max-w-md space-y-2 animate-fade-in shrink-0" style={{ animationDelay: "0.3s" }}>
+        <Button onClick={handleDownload} className="w-full h-10 bg-white text-black hover:bg-white/90 transition-all text-sm font-bold">
+          <Download className="w-4 h-4 mr-2" />
           Baixar Foto
         </Button>
-        <Button onClick={onTryAgain} size="lg" variant="outline" className="w-full btn-mobile border-white/30 hover:bg-white/10 transition-all">
-          <RefreshCw className="w-5 h-5 mr-2" />
+        <Button onClick={onTryAgain} variant="outline" className="w-full h-10 border-white/30 hover:bg-white/10 transition-all text-sm font-bold">
+          <RefreshCw className="w-4 h-4 mr-2" />
           GERAR OUTRA IMAGEM
         </Button>
       </div>
