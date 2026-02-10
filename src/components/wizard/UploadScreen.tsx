@@ -156,7 +156,7 @@ export const UploadScreen = ({
       {/* Upload Area */}
       <div className={cn(
         "w-full max-w-md mb-3 sm:mb-4 animate-fade-in",
-        uploadedImage ? "flex-1 min-h-0 max-h-[45vh] sm:max-h-[50vh]" : ""
+        uploadedImage ? "flex-1 min-h-0 max-h-[40vh]" : ""
       )} style={{ animationDelay: "0.1s" }}>
         {isConverting ? (
           <div className="glass-card p-8 rounded-2xl flex flex-col items-center justify-center">
