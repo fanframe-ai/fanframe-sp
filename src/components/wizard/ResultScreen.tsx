@@ -18,6 +18,7 @@ interface ResultScreenProps {
   onTryAgain: () => void;
   onBalanceUpdate: (newBalance: number) => void;
   onNoCredits: () => void;
+  onHistory?: () => void;
 }
 
 // Progress messages based on queue position
@@ -53,6 +54,7 @@ export const ResultScreen = ({
   onTryAgain,
   onBalanceUpdate,
   onNoCredits,
+  onHistory,
 }: ResultScreenProps) => {
   const [isGenerating, setIsGenerating] = useState(true);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
@@ -202,12 +204,16 @@ export const ResultScreen = ({
       });
 
       // Call generate-tryon (now returns immediately with queue info)
+      // Get FanFrame user ID from localStorage
+      const fanframeUserId = localStorage.getItem("vf_user_id");
+
       const { data, error: fnError } = await supabase.functions.invoke("generate-tryon", {
         body: {
           userImageBase64: userImage,
           shirtAssetUrl,
           backgroundAssetUrl,
           shirtId: selectedShirt.id,
+          userId: fanframeUserId,
         },
       });
 
@@ -528,6 +534,15 @@ export const ResultScreen = ({
           <RefreshCw className="w-4 h-4 mr-2" />
           GERAR OUTRA IMAGEM
         </Button>
+
+        {onHistory && (
+          <button
+            onClick={onHistory}
+            className="w-full text-center text-xs text-white/50 hover:text-white/80 underline underline-offset-2 transition-colors py-1"
+          >
+            📸 Ver meu histórico de fotos
+          </button>
+        )}
       </div>
 
     </div>
