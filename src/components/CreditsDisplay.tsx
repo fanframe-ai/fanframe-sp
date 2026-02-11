@@ -9,23 +9,17 @@ interface CreditsDisplayProps {
 
 export const CreditsDisplay = ({ balance, isLoading, onRefresh }: CreditsDisplayProps) => {
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-background/40 backdrop-blur-md border border-border/30 text-sm">
-      <div className="flex items-center gap-1.5">
-        <Coins className="w-3.5 h-3.5 text-destructive" />
-        <span className="font-medium">
-          {balance}
-        </span>
-      </div>
+    <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-background/60 backdrop-blur-md border border-border/30 text-xs">
+      <Coins className="w-3 h-3 text-destructive" />
+      <span className="font-medium">{balance}</span>
       {onRefresh && (
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-6 w-6 touch-target"
+        <button
+          className="p-0.5 rounded-full hover:bg-muted/50 disabled:opacity-50"
           onClick={onRefresh}
           disabled={isLoading}
         >
-          <RefreshCw className={`w-3 h-3 ${isLoading ? "animate-spin" : ""}`} />
-        </Button>
+          <RefreshCw className={`w-2.5 h-2.5 ${isLoading ? "animate-spin" : ""}`} />
+        </button>
       )}
     </div>
   );
