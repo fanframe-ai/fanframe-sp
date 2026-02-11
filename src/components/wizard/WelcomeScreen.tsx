@@ -5,9 +5,10 @@ import afterExample from "@/assets/after-example.png";
 
 interface WelcomeScreenProps {
   onStart: () => void;
+  onHistory?: () => void;
 }
 
-export const WelcomeScreen = ({ onStart }: WelcomeScreenProps) => {
+export const WelcomeScreen = ({ onStart, onHistory }: WelcomeScreenProps) => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 relative overflow-hidden safe-bottom">
       {/* Background Effects */}
@@ -74,6 +75,16 @@ export const WelcomeScreen = ({ onStart }: WelcomeScreenProps) => {
 
         {/* Trust Elements */}
         <div className="mt-8 sm:mt-10 flex flex-col items-center gap-2 sm:gap-3">
+          {/* History link */}
+          {onHistory && (
+            <button
+              onClick={onHistory}
+              className="text-xs sm:text-sm text-white/60 hover:text-white/90 underline underline-offset-2 transition-colors"
+            >
+              📸 Meu Histórico de Fotos
+            </button>
+          )}
+
           {/* Social Proof */}
           <p className="text-xs sm:text-sm text-white/70 font-medium">
             + de 10.000 Tricolores já vestiram

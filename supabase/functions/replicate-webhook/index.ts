@@ -178,14 +178,38 @@ serve(async (req) => {
         );
       }
 
-      // Success! Update queue with result
+      // Success! Copy image to permanent Supabase Storage
       console.log(`[replicate-webhook] Generation succeeded for ${queueEntry.id}`);
+      
+      let permanentImageUrl = generatedImageUrl;
+      try {
+        console.log(`[replicate-webhook] Copying image to Supabase Storage...`);
+        const imageResponse = await fetch(generatedImageUrl);
+        if (imageResponse.ok) {
+          const imageBlob = await imageResponse.arrayBuffer();
+          const filePath = `results/${queueEntry.id}.png`;
+          
+          const { error: uploadError } = await supabase.storage
+            .from("tryon-temp")
+            .upload(filePath, imageBlob, { contentType: "image/png", upsert: true });
+          
+          if (!uploadError) {
+            const { data: urlData } = supabase.storage.from("tryon-temp").getPublicUrl(filePath);
+            permanentImageUrl = urlData.publicUrl;
+            console.log(`[replicate-webhook] Image saved to Storage: ${permanentImageUrl}`);
+          } else {
+            console.error("[replicate-webhook] Storage upload error:", uploadError);
+          }
+        }
+      } catch (storageErr) {
+        console.error("[replicate-webhook] Error copying to storage:", storageErr);
+      }
       
       const { error: updateError } = await supabase
         .from("generation_queue")
         .update({
           status: "completed",
-          result_image_url: generatedImageUrl,
+          result_image_url: permanentImageUrl,
           completed_at: new Date().toISOString(),
         })
         .eq("id", queueEntry.id);

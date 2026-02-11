@@ -6,6 +6,7 @@ import { BackgroundSelectionScreen } from "@/components/wizard/BackgroundSelecti
 import { UploadScreen } from "@/components/wizard/UploadScreen";
 import { ResultScreen } from "@/components/wizard/ResultScreen";
 import { BuyCreditsScreen } from "@/components/wizard/BuyCreditsScreen";
+import { HistoryScreen } from "@/components/wizard/HistoryScreen";
 import { AccessDeniedScreen } from "@/components/wizard/AccessDeniedScreen";
 import { StepIndicator } from "@/components/wizard/StepIndicator";
 import { CreditsDisplay } from "@/components/CreditsDisplay";
@@ -15,7 +16,7 @@ import { FANFRAME_ENABLED, type Background } from "@/config/fanframe";
 import { Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
-type WizardStep = "welcome" | "buy-credits" | "tutorial" | "shirt" | "background" | "upload" | "result";
+type WizardStep = "welcome" | "buy-credits" | "tutorial" | "shirt" | "background" | "upload" | "result" | "history";
 
 const STEP_ORDER: WizardStep[] = ["welcome", "buy-credits", "tutorial", "shirt", "background", "upload", "result"];
 const STEP_LABELS = ["Início", "Créditos", "Tutorial", "Manto", "Cenário", "Foto", "Resultado"];
@@ -144,7 +145,7 @@ const Index = () => {
   }
 
   const currentStepNumber = STEP_ORDER.indexOf(currentStep) + 1;
-  const showStepIndicator = currentStep !== "welcome" && currentStep !== "result";
+  const showStepIndicator = currentStep !== "welcome" && currentStep !== "result" && currentStep !== "history";
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
@@ -168,7 +169,10 @@ const Index = () => {
       )}
       
       {currentStep === "welcome" && (
-        <WelcomeScreen onStart={() => goToStep(FANFRAME_ENABLED && balance <= 0 ? "buy-credits" : "tutorial")} />
+        <WelcomeScreen 
+          onStart={() => goToStep(FANFRAME_ENABLED && balance <= 0 ? "buy-credits" : "tutorial")}
+          onHistory={() => goToStep("history")}
+        />
       )}
 
       {currentStep === "buy-credits" && (
@@ -237,7 +241,12 @@ const Index = () => {
           onTryAgain={handleTryAgain}
           onBalanceUpdate={handleBalanceUpdate}
           onNoCredits={handleNoCredits}
+          onHistory={() => goToStep("history")}
         />
+      )}
+
+      {currentStep === "history" && (
+        <HistoryScreen onBack={() => goToStep("welcome")} />
       )}
     </div>
   );
