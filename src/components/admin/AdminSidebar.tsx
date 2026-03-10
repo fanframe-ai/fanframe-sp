@@ -19,7 +19,6 @@ const navItems = [
   { href: "/admin/status", icon: Activity, label: "Status" },
   { href: "/admin/alerts", icon: Bell, label: "Alertas" },
   { href: "/admin/settings", icon: Settings, label: "Configurações" },
-  { href: "/admin/deploy", icon: Rocket, label: "Deploy" },
 ];
 
 export function AdminSidebar() {

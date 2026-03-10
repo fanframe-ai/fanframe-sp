@@ -64,11 +64,6 @@ const App = () => (
               <AdminSettings />
             </ProtectedAdminRoute>
           } />
-          <Route path="/admin/deploy" element={
-            <ProtectedAdminRoute>
-              <AdminDeploy />
-            </ProtectedAdminRoute>
-          } />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
