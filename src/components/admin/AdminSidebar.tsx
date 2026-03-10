@@ -8,7 +8,6 @@ import {
   Shield,
   Activity,
   Settings,
-  Rocket
 } from "lucide-react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { cn } from "@/lib/utils";
