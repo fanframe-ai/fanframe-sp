@@ -9,8 +9,8 @@ O **Provador Tricolor Virtual** é uma aplicação web que permite aos usuários
 - **Produção**: https://sptryon.lovable.app
 
 ### Supabase
-- **Project ID**: yxtglwbrdtwmxwrrhroy
-- **URL**: https://yxtglwbrdtwmxwrrhroy.supabase.co
+- **Project ID**: nosobqpiqhskkcfefbuw
+- **URL**: https://nosobqpiqhskkcfefbuw.supabase.co
 
 ---
 
