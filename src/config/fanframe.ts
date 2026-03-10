@@ -78,15 +78,15 @@ export interface Background {
 export const ASSET_URLS = {
   background: `${CLOUD_STORAGE_BASE}/backgrounds/mural.png`,
   shirts: {
-    "manto-1": `${STORAGE_BASE}/shirts/manto-1.png`,
-    "manto-2": `${STORAGE_BASE}/shirts/manto-2.png`,
-    "manto-3": `${STORAGE_BASE}/shirts/manto-3.png`,
+    "manto-1": "/assets/manto-1.png",
+    "manto-2": "/assets/manto-2.png",
+    "manto-3": "/assets/manto-3.png",
   },
   backgrounds: {
     "mural": `${CLOUD_STORAGE_BASE}/backgrounds/mural.png`,
-    "memorial": `${STORAGE_BASE}/backgrounds/memorial.jpg`,
-    "idolos": `${STORAGE_BASE}/backgrounds/idolos.jpg`,
-    "trofeus": `${STORAGE_BASE}/backgrounds/trofeus.jpg`,
+    "memorial": "/assets/background-memorial.jpg",
+    "idolos": "/assets/background-idolos.jpg",
+    "trofeus": "/assets/background-trofeus.jpg",
   },
 } as const;
 
