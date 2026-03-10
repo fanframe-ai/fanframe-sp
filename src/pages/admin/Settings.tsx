@@ -65,14 +65,16 @@ export default function AdminSettings() {
   const checkTokenStatus = async () => {
     setTokenStatus("checking");
     try {
+      const supabaseUrl = "https://nosobqpiqhskkcfefbuw.supabase.co";
+      const anonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5vc29icXBpcWhza2tjZmVmYnV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzNDgzOTEsImV4cCI6MjA4NTkyNDM5MX0.WDUVbxOMNWKaG1pJ8iSf-FLWaSgWgKjnrFfxzMaJvqg";
       const response = await fetch(
-        "https://yxtglwbrdtwmxwrrhroy.supabase.co/functions/v1/health-check",
+        `${supabaseUrl}/functions/v1/health-check`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl4dGdsd2JyZHR3bXh3cnJocm95Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwNzg0NjUsImV4cCI6MjA4NTY1NDQ2NX0.l3VQIroGNVKYmGjfkZ7LNEHq1DuM2hxSo1M-yIuAxE4",
-            apikey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl4dGdsd2JyZHR3bXh3cnJocm95Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwNzg0NjUsImV4cCI6MjA4NTY1NDQ2NX0.l3VQIroGNVKYmGjfkZ7LNEHq1DuM2hxSo1M-yIuAxE4",
+            Authorization: `Bearer ${anonKey}`,
+            apikey: anonKey,
           },
         }
       );
@@ -228,7 +230,7 @@ export default function AdminSettings() {
                 <li>
                   Acesse os{" "}
                   <a
-                    href="https://supabase.com/dashboard/project/yxtglwbrdtwmxwrrhroy/settings/functions"
+                    href="https://supabase.com/dashboard/project/nosobqpiqhskkcfefbuw/settings/functions"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-primary hover:underline inline-flex items-center gap-1"
