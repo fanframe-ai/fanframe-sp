@@ -82,7 +82,7 @@ export const ASSET_URLS = {
     "manto-3": "/assets/manto-3.png",
   },
   backgrounds: {
-    "mural": `${CLOUD_STORAGE_BASE}/backgrounds/mural.png`,
+    "mural": `${STORAGE_BASE}/backgrounds/mural.png`,
     "memorial": "/assets/background-memorial.jpg",
     "idolos": "/assets/background-idolos.jpg",
     "trofeus": "/assets/background-trofeus.jpg",
