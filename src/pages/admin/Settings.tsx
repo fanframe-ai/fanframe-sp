@@ -230,7 +230,7 @@ export default function AdminSettings() {
                 <li>
                   Acesse os{" "}
                   <a
-                    href="https://supabase.com/dashboard/project/yxtglwbrdtwmxwrrhroy/settings/functions"
+                    href="https://supabase.com/dashboard/project/nosobqpiqhskkcfefbuw/settings/functions"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-primary hover:underline inline-flex items-center gap-1"
