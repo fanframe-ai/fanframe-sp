@@ -15,7 +15,7 @@ import AdminStats from "./pages/admin/Stats";
 import AdminAlerts from "./pages/admin/Alerts";
 import AdminSystemStatus from "./pages/admin/SystemStatus";
 import AdminSettings from "./pages/admin/Settings";
-import AdminDeploy from "./pages/admin/Deploy";
+
 import { ProtectedAdminRoute } from "./components/admin/ProtectedAdminRoute";
 
 const queryClient = new QueryClient();
