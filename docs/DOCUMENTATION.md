@@ -9,8 +9,8 @@ O **Provador Tricolor Virtual** é uma aplicação web que permite aos usuários
 - **Produção**: https://sptryon.lovable.app
 
 ### Supabase
-- **Project ID**: yxtglwbrdtwmxwrrhroy
-- **URL**: https://yxtglwbrdtwmxwrrhroy.supabase.co
+- **Project ID**: nosobqpiqhskkcfefbuw
+- **URL**: https://nosobqpiqhskkcfefbuw.supabase.co
 
 ---
 
@@ -405,9 +405,9 @@ Controle de acesso ao painel administrativo.
 ### Variáveis do Frontend (.env)
 
 ```env
-VITE_SUPABASE_PROJECT_ID="yxtglwbrdtwmxwrrhroy"
+VITE_SUPABASE_PROJECT_ID="nosobqpiqhskkcfefbuw"
 VITE_SUPABASE_PUBLISHABLE_KEY="eyJhbGc..."
-VITE_SUPABASE_URL="https://yxtglwbrdtwmxwrrhroy.supabase.co"
+VITE_SUPABASE_URL="https://nosobqpiqhskkcfefbuw.supabase.co"
 ```
 
 **IMPORTANTE**: O arquivo `.env` é auto-gerado pelo Lovable Cloud e não deve ser editado manualmente.

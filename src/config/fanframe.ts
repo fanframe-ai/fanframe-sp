@@ -2,8 +2,7 @@
 // Seguindo estritamente a documentação oficial
 
 // Supabase Storage base URL for permanent assets
-const STORAGE_BASE = "https://yxtglwbrdtwmxwrrhroy.supabase.co/storage/v1/object/public/tryon-assets";
-const CLOUD_STORAGE_BASE = "https://nosobqpiqhskkcfefbuw.supabase.co/storage/v1/object/public/tryon-assets";
+const STORAGE_BASE = "https://nosobqpiqhskkcfefbuw.supabase.co/storage/v1/object/public/tryon-assets";
 
 // Flag para ativar/desativar integração
 export const FANFRAME_ENABLED = true;
@@ -76,14 +75,14 @@ export interface Background {
 
 // Asset URLs from Supabase Storage (permanent, publicly accessible)
 export const ASSET_URLS = {
-  background: `${CLOUD_STORAGE_BASE}/backgrounds/mural.png`,
+  background: `${STORAGE_BASE}/backgrounds/mural.png`,
   shirts: {
     "manto-1": "/assets/manto-1.png",
     "manto-2": "/assets/manto-2.png",
     "manto-3": "/assets/manto-3.png",
   },
   backgrounds: {
-    "mural": `${CLOUD_STORAGE_BASE}/backgrounds/mural.png`,
+    "mural": `${STORAGE_BASE}/backgrounds/mural.png`,
     "memorial": "/assets/background-memorial.jpg",
     "idolos": "/assets/background-idolos.jpg",
     "trofeus": "/assets/background-trofeus.jpg",
