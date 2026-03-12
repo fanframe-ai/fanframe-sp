@@ -11,7 +11,7 @@ Esta aplicação React se integra com um sistema WordPress através da API REST 
 │                        WordPress (FanFrame)                      │
 │  - Gerencia usuários e autenticação                             │
 │  - Controla saldo de créditos                                   │
-│  - Processa compras de pacotes                                  │
+│  - Processa compras via WooCommerce                             │
 │  - Expõe API REST em /wp-json/vf-fanframe/v1/                   │
 └─────────────────────────────────────────────────────────────────┘
                               │
@@ -25,6 +25,7 @@ Esta aplicação React se integra com um sistema WordPress através da API REST 
 │  - Consulta saldo de créditos                                   │
 │  - Debita créditos antes de gerar imagem                        │
 │  - Armazena token no localStorage                               │
+│  - Supabase: nosobqpiqhskkcfefbuw                               │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -37,7 +38,6 @@ Esta aplicação React se integra com um sistema WordPress através da API REST 
 ### Flag de Controle
 
 ```typescript
-// Ativa/desativa toda a integração FanFrame
 export const FANFRAME_ENABLED = true;
 ```
 
@@ -68,23 +68,27 @@ export const FANFRAME_ENDPOINTS = {
 } as const;
 ```
 
-### URLs de Compra de Créditos
+### URLs de Compra de Créditos (WooCommerce)
 
-Abrem em nova aba direcionando para o checkout do WordPress:
+Os links de compra direcionam para o checkout do WooCommerce com `add-to-cart`:
 
 ```typescript
-export const FANFRAME_PURCHASE_URLS = {
-  credits1: "https://tricolorvirtualexperience.net/buy-credits?pack=1",
-  credits3: "https://tricolorvirtualexperience.net/buy-credits?pack=3", // Recomendado
-  credits7: "https://tricolorvirtualexperience.net/buy-credits?pack=7",
-} as const;
+// Definidos diretamente no BuyCreditsScreen como checkout URLs do WooCommerce
+const packages = [
+  { credits: 1, price: "R$ 5,90",  checkoutUrl: "https://tricolorvirtualexperience.net/checkout/?add-to-cart=4516" },
+  { credits: 3, price: "R$ 16,90", checkoutUrl: "https://tricolorvirtualexperience.net/checkout/?add-to-cart=4517" }, // Mais Popular
+  { credits: 7, price: "R$ 34,90", checkoutUrl: "https://tricolorvirtualexperience.net/checkout/?add-to-cart=4518" }, // Melhor Valor
+];
 ```
+
+> **Nota:** As URLs de compra antigas (`FANFRAME_PURCHASE_URLS`) no config ainda existem como fallback, mas o `BuyCreditsScreen` usa diretamente as URLs do WooCommerce acima.
 
 ### Chaves do LocalStorage
 
 ```typescript
 export const FANFRAME_STORAGE_KEYS = {
-  appToken: "vf_app_token",      // Token de autenticação
+  appToken: "vf_app_token",        // Token de autenticação
+  userId: "vf_user_id",            // ID do usuário no WordPress
   generationId: "vf_generation_id", // UUID para idempotência
 } as const;
 ```
@@ -113,10 +117,11 @@ export const FANFRAME_STORAGE_KEYS = {
    ▼
 4. POST /handoff/exchange { "code": "XXXX" }
    │
-   ├─── Sucesso: { ok: true, app_token: "...", balance: 5 }
+   ├─── Sucesso: { ok: true, app_token: "...", user_id: 100, balance: 5 }
    │    │
    │    ▼
    │    Salva token em localStorage["vf_app_token"]
+   │    Salva user_id em localStorage["vf_user_id"]
    │    Remove "code" da URL
    │    Usuário autenticado ✓
    │
@@ -136,52 +141,21 @@ ACESSO SUBSEQUENTE (sem code na URL):
    └─── Token não existe: mostra tela de acesso negado
 ```
 
-### Implementação do Hook
+### Retorno do Hook
 
 ```typescript
 export function useFanFrameAuth() {
-  const [authState, setAuthState] = useState<AuthState>({
-    isAuthenticated: false,
-    isLoading: true,
-    error: null,
-    balance: 0,
-  });
-
   // Retorna:
   return {
     isAuthenticated,  // boolean - usuário está logado?
     isLoading,        // boolean - processando autenticação?
     error,            // string | null - mensagem de erro
     balance,          // number - saldo atual
-    logout,           // () => void - limpa token
+    logout,           // () => void - limpa token, userId e generationId
     updateBalance,    // (n: number) => void - atualiza saldo na UI
     getStoredToken,   // () => string | null - retorna token
   };
 }
-```
-
-### Processo de Exchange
-
-```typescript
-const exchangeCodeForToken = async (code: string): Promise<boolean> => {
-  const response = await fetch(FANFRAME_ENDPOINTS.exchange, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ code }),
-  });
-
-  const data: ExchangeResponse = await response.json();
-  
-  if (data.ok && data.app_token) {
-    localStorage.setItem("vf_app_token", data.app_token);
-    // Remove code da URL para evitar reuso
-    const url = new URL(window.location.href);
-    url.searchParams.delete("code");
-    window.history.replaceState({}, "", url.toString());
-    return true;
-  }
-  return false;
-};
 ```
 
 ---
@@ -209,25 +183,12 @@ const getAuthHeaders = (): HeadersInit => {
 ```typescript
 // GET /credits/balance
 // Header: X-Fanframe-Token: <app_token>
+// cache: "no-store" (sempre consulta direto, sem cache)
 
-const fetchBalance = async (): Promise<number | null> => {
-  const response = await fetch(FANFRAME_ENDPOINTS.balance, {
-    method: "GET",
-    headers: getAuthHeaders(),
-  });
+// Resposta esperada:
+// { ok: true, balance: 7 }
 
-  // Resposta esperada:
-  // { ok: true, balance: 7 }
-  
-  // Se 401: token expirado, fazer logout
-  if (response.status === 401) {
-    handleAuthError(401);
-    return null;
-  }
-
-  const data: BalanceResponse = await response.json();
-  return data.balance ?? 0;
-};
+// Se 401: token expirado, fazer logout via onTokenExpired callback
 ```
 
 ### Debitar Crédito
@@ -236,28 +197,28 @@ const fetchBalance = async (): Promise<number | null> => {
 // POST /credits/debit
 // Header: X-Fanframe-Token: <app_token>
 // Body: { "generation_id": "UUID" }
+// cache: "no-store"
 
-const debitCredit = async (generationId: string): Promise<DebitResult> => {
-  const response = await fetch(FANFRAME_ENDPOINTS.debit, {
-    method: "POST",
-    headers: getAuthHeaders(),
-    body: JSON.stringify({ generation_id: generationId }),
-  });
+// Respostas possíveis:
+// Sucesso: { ok: true, balance_after: 6 }
+// Sem créditos: { ok: false, reason: "no_credits" }
+// Erro HTTP: retorna { success: false, errorCode: "http_XXX" }
+// Erro rede: retorna { success: false, errorCode: "network_error" }
+```
 
-  const data: DebitResponse = await response.json();
+### Retorno do Hook
 
-  // Respostas possíveis:
-  // Sucesso: { ok: true, balance_after: 6 }
-  // Sem créditos: { ok: false, reason: "no_credits" }
-  
-  if (data.ok === false && data.reason === "no_credits") {
-    return { success: false, errorCode: "no_credits" };
-  }
-
-  if (data.ok === true) {
-    return { success: true, balanceAfter: data.balance_after };
-  }
-};
+```typescript
+export function useFanFrameCredits(onTokenExpired?: () => void) {
+  return {
+    isLoading,          // boolean
+    error,              // string | null
+    fetchBalance,       // () => Promise<number | null>
+    debitCredit,        // (generationId: string) => Promise<{ success, balanceAfter?, errorCode? }>
+    generateGenerationId, // () => string - gera ou recupera UUID do localStorage
+    clearGenerationId,    // () => void - limpa após geração bem-sucedida
+  };
+}
 ```
 
 ### Idempotência com generation_id
@@ -266,18 +227,14 @@ O `generation_id` garante que mesmo com retries, o crédito só é debitado uma 
 
 ```typescript
 const generateGenerationId = (): string => {
-  // Verifica se já existe um salvo (para retry)
   const stored = localStorage.getItem("vf_generation_id");
   if (stored) return stored;
-
-  // Gera novo UUID
   const newId = crypto.randomUUID();
   localStorage.setItem("vf_generation_id", newId);
   return newId;
 };
 
 const clearGenerationId = () => {
-  // Chama após geração BEM-SUCEDIDA
   localStorage.removeItem("vf_generation_id");
 };
 ```
@@ -291,17 +248,14 @@ Quando a API retorna HTTP 401:
 ```typescript
 const handleAuthError = (status: number) => {
   if (status === 401) {
-    // Limpa dados locais
     localStorage.removeItem("vf_app_token");
     localStorage.removeItem("vf_generation_id");
-    
-    // Callback para logout
-    onTokenExpired?.();
+    onTokenExpired?.(); // callback passado pelo Index.tsx (= logout)
   }
 };
 ```
 
-O usuário verá a tela `AccessDeniedScreen` com instrução para reabrir via WordPress.
+O usuário verá a tela `AccessDeniedScreen` com instrução para reabrir via WordPress/tour virtual.
 
 ---
 
@@ -330,11 +284,11 @@ WordPress                          React App
     │                                  │
     │                            ┌─────┴─────┐
     │                            │ Buy       │
-    │                            │ Credits   │◄──── Mostra saldo
-    │                            └─────┬─────┘      + opções compra
+    │                            │ Credits   │◄──── Se saldo = 0
+    │                            └─────┬─────┘
     │                                  │
     │  ◄───── Usuário compra ──────────┤
-    │  (abre nova aba no WP)           │
+    │  (redireciona para WooCommerce)  │
     │                                  │
     │                            ┌─────┴─────┐
     │                            │ Tutorial  │
@@ -343,6 +297,11 @@ WordPress                          React App
     │                            ┌─────┴─────┐
     │                            │ Seleciona │
     │                            │ Camisa    │
+    │                            └─────┬─────┘
+    │                                  │
+    │                            ┌─────┴─────┐
+    │                            │ Seleciona │
+    │                            │ Cenário   │
     │                            └─────┬─────┘
     │                                  │
     │                            ┌─────┴─────┐
@@ -402,7 +361,7 @@ Exibida quando:
 - Não há `code` na URL E
 - Não há `vf_app_token` no localStorage
 
-Instruções para o usuário retornar ao WordPress.
+Instruções para o usuário retornar ao tour virtual do Memorial. Link para o site oficial do São Paulo FC.
 
 ---
 
@@ -412,16 +371,36 @@ Instruções para o usuário retornar ao WordPress.
 
 Funcionalidades:
 - Mostra saldo atual
-- Botões para comprar pacotes (abrem nova aba)
+- 3 pacotes de créditos com links diretos para checkout WooCommerce
 - Botão "Atualizar Saldo" para refresh após compra
-- Botão "Continuar" para prosseguir
+- Botão "Continuar" habilitado apenas quando `balance > 0`
 
 ```typescript
 interface BuyCreditsScreenProps {
+  balance: number;
   onRefreshBalance: () => Promise<void>;
-  isRefreshing: boolean;
-  onContinue: () => void;
+  isRefreshing?: boolean;
+  onContinue?: () => void;
+  fetchBalance: () => Promise<number | null>;
 }
+```
+
+### Detecção de Retorno de Pagamento
+
+O `Index.tsx` detecta o parâmetro `?payment=success` na URL para mostrar um toast e atualizar o saldo automaticamente após retorno do checkout:
+
+```typescript
+useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("payment") === "success") {
+    window.history.replaceState({}, "", window.location.pathname);
+    toast({ title: "Pagamento em processamento! 🎉" });
+    setTimeout(async () => {
+      const newBalance = await fetchBalance();
+      if (newBalance !== null) updateBalance(newBalance);
+    }, 2000);
+  }
+}, []);
 ```
 
 ---
@@ -432,21 +411,8 @@ interface BuyCreditsScreenProps {
 
 ```typescript
 const Index = () => {
-  // Hooks de integração
-  const { 
-    isAuthenticated, 
-    isLoading: authLoading, 
-    balance, 
-    updateBalance,
-    logout,
-    getStoredToken 
-  } = useFanFrameAuth();
-
-  const { 
-    fetchBalance, 
-    isLoading: creditsLoading,
-    clearGenerationId 
-  } = useFanFrameCredits(logout);
+  const { isAuthenticated, isLoading: authLoading, balance, updateBalance, logout, getStoredToken } = useFanFrameAuth();
+  const { fetchBalance, isLoading: creditsLoading, clearGenerationId } = useFanFrameCredits(logout);
 
   // Fetch inicial do saldo após autenticação
   useEffect(() => {
@@ -457,16 +423,12 @@ const Index = () => {
   }, [isAuthenticated]);
 
   // Loading state
-  if (FANFRAME_ENABLED && authLoading) {
-    return <Loader2 className="animate-spin" />;
-  }
+  if (FANFRAME_ENABLED && authLoading) return <Loader2 />;
 
   // Not authenticated
-  if (FANFRAME_ENABLED && !isAuthenticated) {
-    return <AccessDeniedScreen />;
-  }
+  if (FANFRAME_ENABLED && !isAuthenticated) return <AccessDeniedScreen />;
 
-  // ... resto do wizard
+  // ... wizard com CreditsDisplay fixo no canto superior direito
 };
 ```
 
@@ -476,25 +438,65 @@ const Index = () => {
 
 Com `FANFRAME_ENABLED = true`:
 
-1. **Welcome** → "Experimentar Agora"
-2. **Buy Credits** → Mostra saldo, opções de compra
+```typescript
+type WizardStep = "welcome" | "buy-credits" | "tutorial" | "shirt" | "background" | "upload" | "result" | "history";
+
+const STEP_ORDER = ["welcome", "buy-credits", "tutorial", "shirt", "background", "upload", "result"];
+const STEP_LABELS = ["Início", "Créditos", "Tutorial", "Manto", "Cenário", "Foto", "Resultado"];
+```
+
+1. **Welcome** → "Experimentar Agora" (vai para buy-credits se saldo=0, senão tutorial)
+2. **Buy Credits** → Mostra saldo, opções de compra via WooCommerce
 3. **Tutorial** → Como funciona
-4. **Shirt Selection** → Escolhe camisa e fundo
-5. **Upload** → Envia foto
-6. **Result** → Gera e mostra resultado
+4. **Shirt Selection** → Escolhe camisa (manto)
+5. **Background Selection** → Escolhe cenário (Mural, Memorial, Galeria dos Ídolos, Sala de Troféus)
+6. **Upload** → Envia foto (verifica saldo antes de prosseguir)
+7. **Result** → Gera e mostra resultado
+8. **History** → Acessível da Welcome, mostra gerações anteriores
+
+### Verificação de Saldo em Múltiplos Pontos
+
+O saldo é verificado antes de prosseguir em:
+- Welcome → redireciona para buy-credits se saldo = 0
+- Background → redireciona para buy-credits se saldo = 0
+- Upload → redireciona para buy-credits se saldo = 0
+
+---
+
+## Assets e Backgrounds
+
+**Arquivo:** `src/config/fanframe.ts`
+
+Assets são servidos do Supabase Storage (`nosobqpiqhskkcfefbuw`):
+
+```typescript
+const STORAGE_BASE = "https://nosobqpiqhskkcfefbuw.supabase.co/storage/v1/object/public/tryon-assets";
+
+export const BACKGROUNDS: Background[] = [
+  { id: "mural",    name: "Mural dos Ídolos",    imageUrl: `${STORAGE_BASE}/backgrounds/mural.png` },
+  { id: "memorial", name: "Memorial SPFC",        imageUrl: "/assets/background-memorial.jpg" },
+  { id: "idolos",   name: "Galeria dos Ídolos",   imageUrl: "/assets/background-idolos.jpg" },
+  { id: "trofeus",  name: "Sala de Troféus",      imageUrl: "/assets/background-trofeus.jpg" },
+];
+```
 
 ---
 
 ## Debug e Logs
 
-Todos os logs usam prefixo `[FanFrame]`:
+Todos os logs usam prefixo `[FanFrame]` com sub-categorias:
 
 ```javascript
-console.log("[FanFrame] Inicializando...");
-console.log("[FanFrame] Token salvo no localStorage");
-console.log("[FanFrame] Consultando saldo...");
-console.log("[FanFrame] Debitando crédito...");
-console.log("[FanFrame] Débito realizado! Saldo após:", balance);
+// Autenticação
+console.log("[FanFrame][Init] ...");
+console.log("[FanFrame][Exchange] ...");
+
+// Créditos
+console.log("[FanFrame][Balance] ...");
+console.log("[FanFrame][Debit] ...");
+
+// Compra
+console.log("[BuyCredits] ...");
 ```
 
 ---
@@ -505,20 +507,28 @@ console.log("[FanFrame] Débito realizado! Saldo após:", balance);
 - [ ] `FANFRAME_ENABLED` está `true`?
 - [ ] `FANFRAME_API_BASE` aponta para URL correta?
 - [ ] WordPress está respondendo nos endpoints?
+- [ ] Supabase project ID: `nosobqpiqhskkcfefbuw`
 
 ### Verificar Autenticação
 - [ ] URL contém `?code=` quando vindo do WordPress?
 - [ ] Exchange retorna `ok: true` e `app_token`?
 - [ ] Token está sendo salvo em `localStorage["vf_app_token"]`?
+- [ ] User ID está sendo salvo em `localStorage["vf_user_id"]`?
 
 ### Verificar Créditos
 - [ ] Header `X-Fanframe-Token` está sendo enviado?
 - [ ] Balance endpoint retorna `ok: true`?
 - [ ] Debit usa `generation_id` único?
+- [ ] `cache: "no-store"` está sendo usado nas requisições?
 
 ### Verificar CORS
 - [ ] WordPress permite origem do app React?
 - [ ] Headers `Access-Control-Allow-*` configurados?
+
+### Verificar Compra
+- [ ] URLs do WooCommerce (`add-to-cart`) estão corretas?
+- [ ] Product IDs: 4516 (1 crédito), 4517 (3 créditos), 4518 (7 créditos)
+- [ ] Retorno de pagamento com `?payment=success` funciona?
 
 ---
 
@@ -530,6 +540,7 @@ console.log("[FanFrame] Débito realizado! Saldo após:", balance);
 | CORS error | WordPress não permite origem | Configurar CORS no WordPress |
 | `no_credits` no debit | Saldo zerado | Redirecionar para compra |
 | Exchange falha | Code já usado ou expirado | Usuário deve reiniciar fluxo |
+| `network_error` no debit | Falha de conexão | Retry automático com mesmo generation_id |
 
 ---
 
